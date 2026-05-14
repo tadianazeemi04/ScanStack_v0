@@ -14,7 +14,7 @@ struct ScanStack_v0App: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ML_Model_test()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
