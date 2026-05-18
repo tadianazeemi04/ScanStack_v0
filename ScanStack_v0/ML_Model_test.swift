@@ -88,36 +88,31 @@ struct ML_Model_test: View {
     }
     
     func runClassification(on image: UIImage) {
-        // Ensure you use the exact size your model was trained on (likely 299x299)
-        guard let resizedImage = image.resize(to: CGSize(width: 299, height: 299)),
-              let pixelBuffer = resizedImage.toCVPixelBuffer() else {
+        // 1. Convert straight to the exact 299x299 buffer your model needs
+        guard let pixelBuffer = image.toCVPixelBuffer() else {
+            print("❌ Could not generate Pixel Buffer")
             return
         }
         
         isProcessing = true
 
-        // Correct background queue syntax
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 let config = MLModelConfiguration()
-                config.computeUnits = .cpuOnly // Required for Simulator hardware bypass
+                config.computeUnits = .cpuOnly // Prevents the Vision framework crash
                 
                 let model = try ScanStackClassifier_1(configuration: config)
-                
-                // Direct prediction to avoid "Inference Context" errors
                 let output = try model.prediction(image: pixelBuffer)
                 
                 DispatchQueue.main.async {
-                    // Mapping to your model's specific 'target' outputs
                     self.detectedCategory = output.target.uppercased()
-                    
                     if let confidence = output.targetProbability[output.target] {
                         self.confidenceValue = String(format: "%.0f%%", confidence * 100)
                     }
                     self.isProcessing = false
                 }
             } catch {
-                print("❌ AI Error: \(error.localizedDescription)")
+                print("❌ Prediction Error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.detectedCategory = "Error"
                     self.isProcessing = false
@@ -131,49 +126,41 @@ struct ML_Model_test: View {
     ML_Model_test()
 }
 
-extension UIImage {
-    func resize(to size: CGSize) -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-        // Draw 'self' into the context to populate it with image data
-        self.draw(in: CGRect(origin: .zero, size: size))
-        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return resizedImage
-    }
 
+extension UIImage {
+    // We combined resize and buffer creation into one powerful, fail-proof function
     func toCVPixelBuffer() -> CVPixelBuffer? {
-        // Hardcode the size to exactly what ScanStackClassifier_1 expects
-        let modelSize = 224
+        let width = 299
+        let height = 299
         
         let attrs = [kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue,
                      kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue] as CFDictionary
-        var pixelBuffer: CVPixelBuffer?
         
-        let status = CVPixelBufferCreate(kCFAllocatorDefault, modelSize, modelSize,
+        var pixelBuffer: CVPixelBuffer?
+        let status = CVPixelBufferCreate(kCFAllocatorDefault, width, height,
                                          kCVPixelFormatType_32ARGB, attrs, &pixelBuffer)
         
-        guard status == noErr, let buffer = pixelBuffer else { return nil }
+        guard status == kCVReturnSuccess, let buffer = pixelBuffer else {
+            return nil
+        }
 
         CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
         let pixelData = CVPixelBufferGetBaseAddress(buffer)
 
-        let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
         let context = CGContext(data: pixelData,
-                                width: modelSize,
-                                height: modelSize,
+                                width: width,
+                                height: height,
                                 bitsPerComponent: 8,
                                 bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-                                space: rgbColorSpace,
+                                space: colorSpace,
                                 bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue)
 
-        context?.translateBy(x: 0, y: CGFloat(modelSize))
-        context?.scaleBy(x: 1.0, y: -1.0)
+        // 🚨 THE FIX: Draw using Core Graphics directly instead of UIKit 🚨
+        if let cgImage = self.cgImage, let ctx = context {
+            ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        }
 
-        UIGraphicsPushContext(context!)
-        // Ensure we draw the image specifically into the 299x299 square
-        self.draw(in: CGRect(x: 0, y: 0, width: modelSize, height: modelSize))
-        UIGraphicsPopContext()
-        
         CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
 
         return buffer
