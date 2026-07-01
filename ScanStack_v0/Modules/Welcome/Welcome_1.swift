@@ -8,7 +8,14 @@
 import SwiftUI
 
 struct Welcome_1: View {
+    
+    @State private var animateCard = false
+    @State private var animateText = false
+    
     var body: some View {
+        
+        
+        
         NavigationStack { // 1. Added NavigationStack to power the NavigationLink
             ZStack (alignment: .top) {
                 // Background Layer
@@ -62,25 +69,25 @@ struct Welcome_1: View {
                             
                             RoundedRectangle(cornerRadius: 32)
                                 .fill(Color.gray.opacity(0.05))
-                                    .frame(width: 150, height: 258)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 32)
-                                            .stroke(Color.black.opacity(0.04), lineWidth: 1)
-                                    )
-                                    .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
-                                    .rotationEffect(.degrees(14))
-                                    .offset(x : 70, y : 10)
+                                .frame(width: 150, height: 258)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 32)
+                                        .stroke(Color.black.opacity(0.04), lineWidth: 1)
+                                )
+                                .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
+                                .rotationEffect(.degrees(animateCard ? 14 : 0))
+                                .offset(x : animateCard ? 70 : 0, y : animateCard ? 10 : 0)
                             
                             RoundedRectangle(cornerRadius: 32)
                                 .fill(Color.gray.opacity(0.05))
-                                    .frame(width: 150, height: 258)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 32)
-                                            .stroke(Color.black.opacity(0.04), lineWidth: 1)
-                                    )
-                                    .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
-                                    .rotationEffect(.degrees(-14))
-                                    .offset(x : -70, y : 10)
+                                .frame(width: 150, height: 258)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 32)
+                                        .stroke(Color.black.opacity(0.04), lineWidth: 1)
+                                )
+                                .shadow(color: Color.black.opacity(0.15), radius: 2, x: 0, y: 1)
+                                .rotationEffect(.degrees(animateCard ? -14 : 0))
+                                .offset(x : animateCard ? -70 : 0, y : animateCard ? 10 : 0)
                             
                             Rectangle()
                                 .fill(Color.white)
@@ -110,38 +117,38 @@ struct Welcome_1: View {
                                     Image("welcome1_ai")
                                         .clipped()
                                 }
+                                
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Capsule()
+                                        .fill(Color.gray.opacity(0.25))
+                                        .frame(width: 160, height: 8)
                                     
-                                        VStack(alignment: .leading, spacing: 10) {
-                                            Capsule()
-                                                .fill(Color.gray.opacity(0.25))
-                                                .frame(width: 160, height: 8)
-                                            
-                                            Capsule()
-                                                .fill(Color.gray.opacity(0.25))
-                                                .frame(width: 100, height: 8)
-                                        }
-                                        
-                                        
-                                        HStack(spacing: 12) {
-                                           
-                                            Capsule()
-                                                .fill(Color.cyan)
-                                                .frame(width: 28, height: 6)
-                                                .padding(.horizontal, 12)
-                                                .padding(.vertical, 6)
-                                                .background(Capsule().fill(Color.cyan.opacity(0.2)))
-                                            
-                                           
-                                            Capsule()
-                                                .fill(Color.purple.opacity(0.6))
-                                                .frame(width: 28, height: 6)
-                                                .padding(.horizontal, 12)
-                                                .padding(.vertical, 6)
-                                                .background(Capsule().fill(Color.purple.opacity(0.15)))
-                                        }
+                                    Capsule()
+                                        .fill(Color.gray.opacity(0.25))
+                                        .frame(width: 100, height: 8)
+                                }
+                                
+                                
+                                HStack(spacing: 12) {
+                                    
+                                    Capsule()
+                                        .fill(Color.cyan)
+                                        .frame(width: 28, height: 6)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Capsule().fill(Color.cyan.opacity(0.2)))
+                                    
+                                    
+                                    Capsule()
+                                        .fill(Color.purple.opacity(0.6))
+                                        .frame(width: 28, height: 6)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Capsule().fill(Color.purple.opacity(0.15)))
                                 }
                             }
                         }
+                    }
                     
                     //welcome 1 details
                     
@@ -155,8 +162,8 @@ struct Welcome_1: View {
                             .foregroundStyle(
                                 LinearGradient(
                                     colors: [Color(hex: "006289"), Color(hex: "831BD7")],
-                                startPoint: .topLeading, endPoint: .bottomTrailing
-                            ))
+                                    startPoint: .topLeading, endPoint: .bottomTrailing
+                                ))
                         
                         Text("Your gallery is full of information. ScanStack uses AI to read your screenshots and organize them automatically.")
                             .font(.system(size: 18, weight: .medium, design: .default))
@@ -190,50 +197,51 @@ struct Welcome_1: View {
                                 .padding(.top, 40)
                         }
                         
-                        Button{
-                            //navigation here
-                        } label: {
-                            HStack(alignment: .center){
+                        NavigationLink(destination: Welcome_2()) {
+                            HStack(alignment: .center) {
                                 Text("Next")
                                     .font(.system(size: 24, weight: .bold, design: .default))
                                     .foregroundStyle(.white)
                                 
                                 Image(systemName: "arrowshape.right.fill")
                                     .font(.system(size: 16))
-                                
+                                    .foregroundStyle(.white) // Added to match the text
                             }
                             .frame(width: 338, height: 68, alignment: .center)
                             .background(
-                                LinearGradient(colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")], startPoint: .leading, endPoint: .trailing)
+                                LinearGradient(
+                                    colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
                             .cornerRadius(1000)
                             .padding(.top, 10)
                             .shadow(radius: 6)
-                            .shadow(color: Color.btnGradiantColor1.opacity(0.3), radius: 6, x : 2, y : 2)
-                            
+                            .shadow(color: Color("btn_gradiant_color_1").opacity(0.3), radius: 6, x: 2, y: 2)
                         }
                     }
                     
-                    }
+                }
                 
                 // Model Badges
-                            Image("classified")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 77)
-                                .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
-                                .offset(x: 95, y: 180)
-                            
-                            Image("extraction")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 77)
-                                .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
-                                .offset(x: -95, y: 265)
-                }
+                Image("classified")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 77)
+                    .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
+                    .offset(x: 95, y: 180)
+                
+                Image("extraction")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 77)
+                    .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
+                    .offset(x: -95, y: 265)
             }
         }
     }
+}
 
 
 #Preview {

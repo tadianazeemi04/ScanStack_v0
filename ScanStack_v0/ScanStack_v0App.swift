@@ -14,8 +14,7 @@ struct ScanStack_v0App: App {
 
     var body: some Scene {
         WindowGroup {
-            LogoPopUp()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            StartupView()
         }
     }
 }
