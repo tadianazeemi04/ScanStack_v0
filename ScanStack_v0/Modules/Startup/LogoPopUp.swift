@@ -81,7 +81,7 @@ struct StartupView: View {
             if showNextScreen {
                 // This is where your app goes after the splash screen finishes
                 // I am guessing it goes to Welcome_1 based on your previous files
-                Welcome_1()
+                Onboarding()
                     // Optional: A nice fade transition when swapping screens
                     .transition(.opacity)
             } else {
