@@ -47,11 +47,8 @@ struct Registeration: View {
     @State private var animateLogo = false
     @State private var animateLogoBack = false
     
-    @State private var fullName: String = ""
-    @State private var email: String = ""
-    
-    @State private var dateOfBirth: String = ""
-    @State private var selectedDate = Date()
+    @StateObject private var viewModel = RegistrationViewModel()
+    @State private var navigateToSecurity = false
 
     // Set minimum date boundary to Jan 1, 1960 (from your UIKit code)
     private var minDate: Date {
@@ -64,9 +61,9 @@ struct Registeration: View {
 
     // Check if age is valid (At least 16 years old)
     private var isAgeValid: Bool {
-        let ageComponents = Calendar.current.dateComponents([.year], from: selectedDate, to: Date())
+        let ageComponents = Calendar.current.dateComponents([.year], from: viewModel.selectedDate, to: Date())
         let age = ageComponents.year ?? 0
-        return age >= 16 && !dateOfBirth.isEmpty
+        return age >= 16 && !viewModel.dateOfBirth.isEmpty
     }
 
     
@@ -137,7 +134,7 @@ struct Registeration: View {
                 
                 VStack{
                     HStack{
-                        TextField("Full Name", text: $fullName)
+                        TextField("Full Name", text: $viewModel.fullName)
                             .font(.system(size: 16, weight: .regular))
                             .foregroundColor(Color(.label))
                             .autocorrectionDisabled()
@@ -156,7 +153,7 @@ struct Registeration: View {
                     }
                     
                     HStack{
-                        TextField("Email Address", text: $email)
+                        TextField("Email Address", text: $viewModel.email)
                             .font(.system(size: 16, weight: .regular))
                             .foregroundColor(Color(.label))
                             .autocorrectionDisabled()
@@ -171,7 +168,7 @@ struct Registeration: View {
                                     .stroke(Color(hex: "ABADAF").opacity(0.30), lineWidth: 1)
                             )
                             .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-                        
+                            .padding(.top, 6)
                     }
                     
                     HStack {
@@ -181,9 +178,9 @@ struct Registeration: View {
                                 .foregroundColor(Color(hex: "006289"))
                             
                             // Changed to Text view so the keyboard doesn't open manually
-                            Text(dateOfBirth.isEmpty ? "Date of Birth (DD/MM/YYYY)" : dateOfBirth)
+                            Text(viewModel.dateOfBirth.isEmpty ? "Date of Birth (DD/MM/YYYY)" : viewModel.dateOfBirth)
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(dateOfBirth.isEmpty ? Color(.placeholderText) : Color(.label))
+                                .foregroundColor(viewModel.dateOfBirth.isEmpty ? Color(.placeholderText) : Color(.label))
                             
                             Spacer()
                         }
@@ -197,7 +194,7 @@ struct Registeration: View {
                             // Transparent DatePicker container enforcing your strict UIKit rules
                             DatePicker(
                                 "",
-                                selection: $selectedDate,
+                                selection: $viewModel.selectedDate,
                                 in: minDate...Date(), // Min: 1960, Max: Today
                                 displayedComponents: [.date]
                             )
@@ -206,17 +203,17 @@ struct Registeration: View {
                             .scaleEffect(x: 10, y: 1, anchor: .center)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .colorMultiply(.clear) // Completely invisible, fully tappable
-                            .onChange(of: selectedDate) { newDate in
+                            .onChange(of: viewModel.selectedDate) { newDate in
                                 let formatter = DateFormatter()
                                 formatter.dateFormat = "dd/MM/yyyy"
-                                dateOfBirth = formatter.string(from: newDate)
+                                viewModel.dateOfBirth = formatter.string(from: newDate)
                             }
                         )
                         .overlay(
                             Capsule()
                                 .stroke(
                                     // Turns red if they pick a date but are under 16 years old
-                                    (!dateOfBirth.isEmpty && !isAgeValid) ? Color.red : Color(hex: "ABADAF").opacity(0.30),
+                                    (!viewModel.dateOfBirth.isEmpty && !isAgeValid) ? Color.red : Color(hex: "ABADAF").opacity(0.30),
                                     lineWidth: 1
                                 )
                         )
@@ -226,8 +223,43 @@ struct Registeration: View {
 
 
                     
-                    NavigationActionButton(title: "Create Account", destination: Security())
-                        .frame(width: 344)
+                    if let errorMsg = viewModel.errorMessage {
+                        Text(errorMsg)
+                            .foregroundColor(.red)
+                            .font(.system(size: 14, weight: .medium))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                            .padding(.top, 4)
+                    }
+
+                    Button(action: {
+                        if viewModel.validateRegistrationDetails() {
+                            navigateToSecurity = true
+                        }
+                    }) {
+                        HStack(alignment: .center) {
+                            Text("Create Account")
+                                .font(.system(size: 24, weight: .bold, design: .default))
+                                .foregroundStyle(.white)
+                        }
+                        .frame(width: 338, height: 68, alignment: .center)
+                        .background(
+                            LinearGradient(
+                                colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(1000)
+                        .padding(.top, 10)
+                        .shadow(radius: 6)
+                        .shadow(color: Color("btn_gradiant_color_1").opacity(0.3), radius: 6, x: 2, y: 2)
+                    }
+                    .frame(width: 344)
+                    
+                    NavigationLink(destination: Security(viewModel: viewModel), isActive: $navigateToSecurity) {
+                        EmptyView()
+                    }
                     
                     HStack(spacing: 16) { // Controls space between lines and text
                         

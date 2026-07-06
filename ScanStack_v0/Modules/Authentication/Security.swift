@@ -14,7 +14,7 @@ private enum PasswordStrength {
 
     var label: String {
         switch self {
-        case .empty:      return ""
+        case .empty:      return "Waiting..."
         case .weak:       return "WEAK PASSWORD"
         case .fair:       return "FAIR PASSWORD"
         case .strong:     return "STRONG PASSWORD"
@@ -34,7 +34,7 @@ private enum PasswordStrength {
 
     var percentageLabel: String {
         switch self {
-        case .empty:      return ""
+        case .empty:      return "0% secure"
         case .weak:       return "25% secure"
         case .fair:       return "50% secure"
         case .strong:     return "65% secure"
@@ -44,7 +44,7 @@ private enum PasswordStrength {
 
     var color: Color {
         switch self {
-        case .empty:      return Color.clear
+        case .empty:      return Color.gray
         case .weak:       return Color(hex: "FF4D4D")
         case .fair:       return Color(hex: "FFA500")
         case .strong:     return Color(hex: "7B2FBE")
@@ -124,7 +124,7 @@ private struct StrengthBar: View {
             ZStack(alignment: .leading) {
                 // Track
                 Capsule()
-                    .fill(Color(hex: "EBEBEB"))
+                    .fill(Color(hex: "F4F6FB"))
                     .frame(height: 5)
 
                 // Fill
@@ -201,10 +201,10 @@ private struct PasswordInputField: View {
                 }
             }
             .padding(.horizontal, 16)
-            .frame(width: 320, height: 54)
+            .frame(width: 300, height: 54)
             .background(
                 Capsule()
-                    .fill(Color.white)
+                    .fill(Color.white).opacity(0.6)
             )
             .overlay(
                 // 2. The outer border layer
@@ -229,7 +229,7 @@ private struct PasswordInputField: View {
                             .mask(
                                 Capsule()
                                     .stroke(lineWidth: 2)
-                                    .frame(width: 320, height: 54)
+                                    .frame(width: 300, height: 54)
                             )
                     } else {
                         // Default static fallback border when not active
@@ -320,8 +320,9 @@ private struct PasswordInputField: View {
 struct Security: View {
 
     // MARK: State
-    @State private var password: String = ""
-    @State private var confirmPassword: String = ""
+    @ObservedObject var viewModel: RegistrationViewModel
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
+    
     @State private var isPasswordVisible: Bool = false
     @State private var isConfirmVisible: Bool = false
 
@@ -332,12 +333,12 @@ struct Security: View {
     @State private var isButtonPressed = false
 
     // MARK: Computed
-    private var strength: PasswordStrength { evaluateStrength(password) }
+    private var strength: PasswordStrength { evaluateStrength(viewModel.password) }
 
-    private var hasMinLength:  Bool { password.count >= 8 }
-    private var hasNumber:     Bool { password.range(of: "[0-9]", options: .regularExpression) != nil }
+    private var hasMinLength:  Bool { viewModel.password.count >= 8 }
+    private var hasNumber:     Bool { viewModel.password.range(of: "[0-9]", options: .regularExpression) != nil }
     private var hasSpecial:    Bool {
-        password.range(of: "[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]",
+        viewModel.password.range(of: "[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]",
                        options: .regularExpression) != nil
     }
 
@@ -431,7 +432,7 @@ struct Security: View {
                             PasswordInputField(
                                 label: "PASSWORD",
                                 icon: "lock",
-                                text: $password,
+                                text: $viewModel.password,
                                 isVisible: $isPasswordVisible
                             )
 
@@ -454,14 +455,14 @@ struct Security: View {
                                         .foregroundColor(Color(hex: "ABADAF"))
                                         .animation(.easeInOut(duration: 0.3), value: strength.percentageLabel)
                                 }
-                                .frame(maxWidth: .infinity)
+                                .frame(maxWidth: 300)
                             }
 
                             // Confirm password field
                             PasswordInputField(
                                 label: "CONFIRM PASSWORD",
                                 icon: "lock.rotation",
-                                text: $confirmPassword,
+                                text: $viewModel.confirmPassword,
                                 isVisible: $isConfirmVisible
                             )
 
@@ -484,7 +485,7 @@ struct Security: View {
                             .padding(.horizontal, 16)
                             .background(
                                 RoundedRectangle(cornerRadius: 16)
-                                    .fill(Color.white.opacity(0.35))
+                                    .fill(Color.white.opacity(0.6))
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
@@ -499,6 +500,7 @@ struct Security: View {
                             withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) {
                                 isButtonPressed = true
                             }
+                            viewModel.registerUser()
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                                 withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) {
                                     isButtonPressed = false
@@ -506,15 +508,20 @@ struct Security: View {
                             }
                         }) {
                             HStack(spacing: 10) {
-                                Text("Set Password")
-                                    .font(.system(size: 22, weight: .bold))
-                                    .foregroundStyle(.white)
+                                if viewModel.isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Text("Set Password")
+                                        .font(.system(size: 22, weight: .bold))
+                                        .foregroundStyle(.white)
 
-                                Image(systemName: "arrow.right")
-                                    .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(.white)
-                                    .offset(x: isButtonPressed ? 4 : 0)
-                                    .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isButtonPressed)
+                                    Image(systemName: "arrow.right")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .offset(x: isButtonPressed ? 4 : 0)
+                                        .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isButtonPressed)
+                                }
                             }
                             .frame(maxWidth: 300, minHeight: 68, alignment: .center)
                             .background(
@@ -530,22 +537,19 @@ struct Security: View {
                             .shadow(color: Color("btn_gradiant_color_1").opacity(0.3), radius: 6, x: 2, y: 2)
                             .padding(.top, 6)
                         }
-
-                        // ── Back button ──
-                        Button(action: {}) {
-                            HStack(spacing: 4) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 14, weight: .semibold))
-                                Text("Back")
-                                    .font(.system(size: 15, weight: .semibold))
-                            }
-                            .foregroundColor(Color(hex: "006289"))
-                            .padding(.top, 4)
+                        .disabled(viewModel.isLoading)
+                        
+                        if let errorMessage = viewModel.errorMessage {
+                            Text(errorMessage)
+                                .foregroundColor(Color(hex: "FF4D4D"))
+                                .font(.system(size: 14, weight: .medium))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 16)
+                                .padding(.top, 8)
                         }
-                        .padding(.bottom, 8)
 
                     }
-                    .padding(.horizontal, 12)
+                    .padding(.horizontal, 24)
                     .padding(.vertical, 24)
                     .background(
                         // Glassmorphism: frosted glass + white tint layer
@@ -569,13 +573,19 @@ struct Security: View {
                     )
                     .shadow(color: Color.black.opacity(0.08), radius: 20, x: 0, y: 8)
                     .padding(.horizontal, 46)
-                    .padding(.bottom, 34)
+                    .padding(.top, 10)
+                    
 
                 }
                 .padding(.top, 16)
             }
         }
         .navigationBarBackButtonHidden(true)
+        .onChange(of: viewModel.registrationSuccess) { _, success in
+            if success {
+                isLoggedIn = true
+            }
+        }
     }
 }
 
@@ -583,6 +593,6 @@ struct Security: View {
 
 #Preview {
     NavigationView {
-        Security()
+        Security(viewModel: RegistrationViewModel())
     }
 }
