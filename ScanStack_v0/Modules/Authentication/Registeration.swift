@@ -203,8 +203,9 @@ struct Registeration: View {
                             )
                             .datePickerStyle(.compact)
                             .labelsHidden()
+                            .scaleEffect(x: 10, y: 1, anchor: .center)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .opacity(0.015) // Completely invisible, fully tappable
+                            .colorMultiply(.clear) // Completely invisible, fully tappable
                             .onChange(of: selectedDate) { newDate in
                                 let formatter = DateFormatter()
                                 formatter.dateFormat = "dd/MM/yyyy"
