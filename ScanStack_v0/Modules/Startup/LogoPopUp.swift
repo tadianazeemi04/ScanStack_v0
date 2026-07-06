@@ -75,15 +75,18 @@ import SwiftUI
 
 struct StartupView: View {
     @State private var showNextScreen = false
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
     
     var body: some View {
         ZStack {
             if showNextScreen {
-                // This is where your app goes after the splash screen finishes
-                // I am guessing it goes to Welcome_1 based on your previous files
-                Onboarding()
-                    // Optional: A nice fade transition when swapping screens
-                    .transition(.opacity)
+                if isLoggedIn {
+                    HomeScreen()
+                        .transition(.opacity)
+                } else {
+                    Onboarding()
+                        .transition(.opacity)
+                }
             } else {
                 LogoPopUp()
                     .transition(.opacity)
@@ -99,6 +102,7 @@ struct StartupView: View {
         }
     }
 }
+
 
 struct LogoPopUp: View {
     // 1. Add state variables to trigger the animations
