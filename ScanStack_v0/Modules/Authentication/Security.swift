@@ -183,9 +183,11 @@ private struct PasswordInputField: View {
                 Group {
                     if isVisible {
                         TextField("", text: $text)
+                            .tint(Color(hex: "757779"))
                             .focused($isTextFieldFocused)
                     } else {
                         SecureField("", text: $text)
+                            .tint(Color(hex: "757779"))
                             .focused($isTextFieldFocused)
                     }
                 }
@@ -231,6 +233,7 @@ private struct PasswordInputField: View {
                                     .stroke(lineWidth: 2)
                                     .frame(width: 300, height: 54)
                             )
+                            .allowsHitTesting(false)
                     } else {
                         // Default static fallback border when not active
                         Capsule()
@@ -321,6 +324,7 @@ struct Security: View {
 
     // MARK: State
     @ObservedObject var viewModel: RegistrationViewModel
+    @State private var navigateToVerification = false
     @AppStorage("isLoggedIn") private var isLoggedIn = false
     
     @State private var isPasswordVisible: Bool = false
@@ -576,6 +580,10 @@ struct Security: View {
                     .padding(.top, 10)
                     
 
+                    
+                    NavigationLink(destination: EmailVerificationView(), isActive: $navigateToVerification) {
+                        EmptyView()
+                    }
                 }
                 .padding(.top, 16)
             }
@@ -583,7 +591,7 @@ struct Security: View {
         .navigationBarBackButtonHidden(true)
         .onChange(of: viewModel.registrationSuccess) { _, success in
             if success {
-                isLoggedIn = true
+                navigateToVerification = true
             }
         }
     }

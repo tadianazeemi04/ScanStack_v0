@@ -1,8 +1,8 @@
 //
-//  Registeration.swift
+//  Login.swift
 //  ScanStack_v0
 //
-//  Created by Tadian Ahmad Azeemi on 19/05/2026.
+//  Created by Tadian Ahmad Azeemi on 06/07/2026.
 //
 
 import SwiftUI
@@ -10,18 +10,20 @@ import GoogleSignIn
 import FirebaseAuth
 import FirebaseFirestore
 
-struct Registeration: View {
+struct Login: View {
     
-    enum RegField { case name, email }
-    @FocusState private var focusedField: RegField?
-    @State private var nameRotation: Double = 0.0
+    enum LoginField { case email, password }
+    @FocusState private var focusedField: LoginField?
     @State private var emailRotation: Double = 0.0
+    @State private var passwordRotation: Double = 0.0
+    @State private var isPasswordVisible: Bool = false
+    @State private var navigateToVerification = false
     
     @AppStorage("isLoggedIn") private var isLoggedIn = false
+    @Environment(\.presentationMode) var presentationMode
     
-    //google signin authentication
+    // Google sign-in authentication
     func performGoogleSignIn() {
-        // Get the root view controller to present the Google Sign-in web flow overlay
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let rootViewController = windowScene.windows.first?.rootViewController else {
             print("Error: Unable to find root view controller")
@@ -37,12 +39,10 @@ struct Registeration: View {
             guard let result = signInResult else { return }
             let user = result.user
             
-            // 1. Get Google tokens
             guard let idToken = user.idToken?.tokenString else { return }
             let credential = GoogleAuthProvider.credential(withIDToken: idToken,
                                                            accessToken: user.accessToken.tokenString)
             
-            // 2. Sign in to Firebase using the Google credential
             Auth.auth().signIn(with: credential) { authResult, error in
                 if let error = error {
                     print("Firebase Sign-in error: \(error.localizedDescription)")
@@ -51,21 +51,18 @@ struct Registeration: View {
                 
                 guard let firebaseUser = authResult?.user else { return }
                 
-                // 3. Save to Firestore Database
                 let db = Firestore.firestore()
                 let userData: [String: Any] = [
                     "uid": firebaseUser.uid,
                     "fullName": user.profile?.name ?? "Unknown",
                     "email": user.profile?.email ?? "No Email",
-                    "dateOfBirth": "", // Left empty as per user request
-                    "createdAt": Timestamp(date: Date())
+                    "lastLoginAt": Timestamp(date: Date())
                 ]
                 
                 db.collection("users").document(firebaseUser.uid).setData(userData, merge: true) { error in
                     if let error = error {
-                        print("Failed to save Google user to database: \(error.localizedDescription)")
+                        print("Failed to update Google user: \(error.localizedDescription)")
                     } else {
-                        // 4. Finally, navigate to Home Screen
                         DispatchQueue.main.async {
                             withAnimation {
                                 self.isLoggedIn = true
@@ -76,31 +73,9 @@ struct Registeration: View {
             }
         }
     }
-
     
-    @State private var animateLogo = false
     @State private var animateLogoBack = false
-    
-    @StateObject private var viewModel = RegistrationViewModel()
-    @State private var navigateToSecurity = false
-    @State private var navigateToLogin = false
-
-    // Set minimum date boundary to Jan 1, 1960 (from your UIKit code)
-    private var minDate: Date {
-        var components = DateComponents()
-        components.year = 1960
-        components.month = 1
-        components.day = 1
-        return Calendar.current.date(from: components) ?? Date()
-    }
-
-    // Check if age is valid (At least 16 years old)
-    private var isAgeValid: Bool {
-        let ageComponents = Calendar.current.dateComponents([.year], from: viewModel.selectedDate, to: Date())
-        let age = ageComponents.year ?? 0
-        return age >= 16 && !viewModel.dateOfBirth.isEmpty
-    }
-
+    @StateObject private var viewModel = LoginViewModel()
     
     var body: some View {
         ZStack(alignment: .top){
@@ -120,7 +95,6 @@ struct Registeration: View {
                 .frame(width: 316, height: 316)
                 .offset(x: 0, y: 550)
             
-            
             VStack(alignment: .center, spacing: 10){
                 
                 ZStack(alignment: .center) {
@@ -132,16 +106,21 @@ struct Registeration: View {
                         .offset(x: animateLogoBack ? 4 : 0, y: animateLogoBack ? 4 : 0)
                     
                     Rectangle()
-                        .fill(Color("LogoBack")) // Ensure this color exists in your assets!
+                        .fill(Color("LogoBack"))
                         .frame(width: 60, height: 60)
                         .cornerRadius(18)
                         .rotationEffect(.degrees(animateLogoBack ? -8 : 0))
                         .offset(x: animateLogoBack ? -4 : 0, y: animateLogoBack ? -4 : 0)
                     
-                    Image("ScanStackLogo") // Ensure this image exists in your assets!
+                    Image("ScanStackLogo")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 60, height: 60)
+                }
+                .onAppear {
+                    withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+                        animateLogoBack = true
+                    }
                 }
                 
                 Text("ScanStack")
@@ -153,61 +132,15 @@ struct Registeration: View {
                             startPoint: .leading, endPoint: .trailing
                         )
                     )
-                Text("Welcome! Let’s get you started.")
+                Text("Welcome back!\nLog in to continue.")
                     .foregroundStyle(Color(hex: "2C2F31"))
                     .font(.system(size: 26))
                     .fontWeight(.bold)
                     .frame(width: 320, height: 72)
                     .multilineTextAlignment(.center)
-                Text("Tell us a bit about yourself to personalize your ScanStack.")
-                    .foregroundStyle(Color(hex: "595C5E"))
-                    .font(.system(size: 16))
-                    .fontWeight(.regular)
-                    .frame(width: 320, height: 72)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, -16)
+                    .padding(.top, 16)
                 
                 VStack{
-                    HStack{
-                        TextField("Full Name", text: $viewModel.fullName)
-                            .focused($focusedField, equals: .name)
-                            .tint(Color(hex: "757779"))
-                            .font(.system(size: 16, weight: .regular))
-                            .foregroundColor(Color(.label))
-                            .autocorrectionDisabled()
-                            .padding(.horizontal, 24)
-                            .frame(width: 344, height: 54)
-                            .background(
-                                Capsule()
-                                    .fill(Color.white)
-                            )
-                            .overlay(
-                                Group {
-                                    if focusedField == .name {
-                                        Rectangle()
-                                            .fill(AngularGradient(colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1"), Color("btn_gradiant_color_0")], center: .center))
-                                            .frame(width: 400, height: 400)
-                                            .rotationEffect(.degrees(nameRotation))
-                                            .mask(Capsule().stroke(lineWidth: 2).frame(width: 344, height: 54))
-                                            .allowsHitTesting(false)
-                                    } else {
-                                        Capsule().stroke(Color(hex: "ABADAF").opacity(0.30), lineWidth: 1)
-                                    }
-                                }
-                            )
-                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
-                            .onChange(of: focusedField) { _, field in
-                                if field == .name {
-                                    withAnimation(.linear(duration: 4.0).repeatForever(autoreverses: false)) {
-                                        nameRotation = 360.0
-                                    }
-                                } else {
-                                    nameRotation = 0.0
-                                }
-                            }
-                        
-                    }
-                    
                     HStack{
                         TextField("Email Address", text: $viewModel.email)
                             .focused($focusedField, equals: .email)
@@ -215,6 +148,7 @@ struct Registeration: View {
                             .font(.system(size: 16, weight: .regular))
                             .foregroundColor(Color(.label))
                             .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
                             .padding(.horizontal, 24)
                             .frame(width: 344, height: 54)
                             .background(
@@ -245,60 +179,89 @@ struct Registeration: View {
                                     emailRotation = 0.0
                                 }
                             }
-                            .padding(.top, 6)
                     }
+                    .padding(.top, 16)
+                    
+                    HStack(spacing: 14) {
+                        Group {
+                            if isPasswordVisible {
+                                TextField("Password", text: $viewModel.password)
+                                    .focused($focusedField, equals: .password)
+                                    .tint(Color(hex: "757779"))
+                                    .font(.system(size: 16, weight: .regular))
+                                    .foregroundColor(Color(.label))
+                                    .autocorrectionDisabled()
+                                    .textInputAutocapitalization(.never)
+                            } else {
+                                SecureField("Password", text: $viewModel.password)
+                                    .focused($focusedField, equals: .password)
+                                    .tint(Color(hex: "757779"))
+                                    .font(.system(size: 16, weight: .regular))
+                                    .foregroundColor(Color(.label))
+                                    .autocorrectionDisabled()
+                                    .textInputAutocapitalization(.never)
+                            }
+                        }
+                        
+                        Button(action: { withAnimation(.easeInOut(duration: 0.2)) { isPasswordVisible.toggle() } }) {
+                            Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                                .font(.system(size: 18, weight: .regular))
+                                .foregroundColor(Color(hex: "ABADAF"))
+                        }
+                    }
+                            .padding(.horizontal, 24)
+                            .frame(width: 344, height: 54)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white)
+                            )
+                            .overlay(
+                                Group {
+                                    if focusedField == .password {
+                                        Rectangle()
+                                            .fill(AngularGradient(colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1"), Color("btn_gradiant_color_0")], center: .center))
+                                            .frame(width: 400, height: 400)
+                                            .rotationEffect(.degrees(passwordRotation))
+                                            .mask(Capsule().stroke(lineWidth: 2).frame(width: 344, height: 54))
+                                            .allowsHitTesting(false)
+                                    } else {
+                                        Capsule().stroke(Color(hex: "ABADAF").opacity(0.30), lineWidth: 1)
+                                    }
+                                }
+                            )
+                            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+                            .onChange(of: focusedField) { _, field in
+                                if field == .password {
+                                    withAnimation(.linear(duration: 4.0).repeatForever(autoreverses: false)) {
+                                        passwordRotation = 360.0
+                                    }
+                                } else {
+                                    passwordRotation = 0.0
+                                }
+                            }
+                            .padding(.top, 6)
                     
                     HStack {
-                        HStack(spacing: 14) {
-                            Image(systemName: "calendar")
-                                .font(.system(size: 16, weight: .regular))
+                        Spacer()
+                        Button(action: {
+                            viewModel.resetPassword()
+                        }) {
+                            Text("Forgot Password?")
+                                .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(Color(hex: "006289"))
-                            
-                            // Changed to Text view so the keyboard doesn't open manually
-                            Text(viewModel.dateOfBirth.isEmpty ? "Date of Birth (DD/MM/YYYY)" : viewModel.dateOfBirth)
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(viewModel.dateOfBirth.isEmpty ? Color(.placeholderText) : Color(.label))
-                            
-                            Spacer()
                         }
-                        .padding(.horizontal, 24)
-                        .frame(width: 344, height: 54)
-                        .background(
-                            Capsule()
-                                .fill(Color.white)
-                        )
-                        .overlay(
-                            // Transparent DatePicker container enforcing your strict UIKit rules
-                            DatePicker(
-                                "",
-                                selection: $viewModel.selectedDate,
-                                in: minDate...Date(), // Min: 1960, Max: Today
-                                displayedComponents: [.date]
-                            )
-                            .datePickerStyle(.compact)
-                            .labelsHidden()
-                            .scaleEffect(x: 10, y: 1, anchor: .center)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .colorMultiply(.clear) // Completely invisible, fully tappable
-                            .onChange(of: viewModel.selectedDate) { newDate in
-                                let formatter = DateFormatter()
-                                formatter.dateFormat = "dd/MM/yyyy"
-                                viewModel.dateOfBirth = formatter.string(from: newDate)
-                            }
-                        )
-                        .overlay(
-                            Capsule()
-                                .stroke(
-                                    // Turns red if they pick a date but are under 16 years old
-                                    (!viewModel.dateOfBirth.isEmpty && !isAgeValid) ? Color.red : Color(hex: "ABADAF").opacity(0.30),
-                                    lineWidth: 1
-                                )
-                        )
-                        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
                     }
-                    .padding(.top, 6)
-
-
+                    .frame(width: 344)
+                    .padding(.top, 4)
+                    
+                    if let successMsg = viewModel.resetPasswordSuccessMessage {
+                        Text(successMsg)
+                            .foregroundColor(Color(hex: "34C759"))
+                            .font(.system(size: 14, weight: .medium))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                            .padding(.top, 4)
+                    }
                     
                     if let errorMsg = viewModel.errorMessage {
                         Text(errorMsg)
@@ -308,16 +271,19 @@ struct Registeration: View {
                             .padding(.horizontal, 24)
                             .padding(.top, 4)
                     }
-
+                    
                     Button(action: {
-                        if viewModel.validateRegistrationDetails() {
-                            navigateToSecurity = true
-                        }
+                        viewModel.loginUser()
                     }) {
                         HStack(alignment: .center) {
-                            Text("Create Account")
-                                .font(.system(size: 24, weight: .bold, design: .default))
-                                .foregroundStyle(.white)
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Text("Log In")
+                                    .font(.system(size: 24, weight: .bold, design: .default))
+                                    .foregroundStyle(.white)
+                            }
                         }
                         .frame(width: 338, height: 68, alignment: .center)
                         .background(
@@ -328,54 +294,45 @@ struct Registeration: View {
                             )
                         )
                         .cornerRadius(1000)
-                        .padding(.top, 10)
+                        .padding(.top, viewModel.errorMessage == nil ? 4 : 8)
                         .shadow(radius: 6)
                         .shadow(color: Color("btn_gradiant_color_1").opacity(0.3), radius: 6, x: 2, y: 2)
                     }
                     .frame(width: 344)
+                    .disabled(viewModel.isLoading)
                     
-                    NavigationLink(destination: Security(viewModel: viewModel), isActive: $navigateToSecurity) {
-                        EmptyView()
-                    }
-                    
-                    HStack(spacing: 16) { // Controls space between lines and text
-                        
-                        // 1. Left Divider Line
+                    HStack(spacing: 16) {
                         Divider()
-                            .frame(width: 138, height: 1) // Enforces a crisp 1-pixel baseline profile
-                            .overlay(Color(hex: "000000").opacity(0.2)) // Subtle contrasting tone matching the image
+                            .frame(width: 138, height: 1)
+                            .overlay(Color(hex: "000000").opacity(0.2))
                         
-                        // 2. Central Text Asset
                         Text("OR")
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(Color(hex: "000000").opacity(0.3)) // Muted text styling matching the asset backdrop
-                            .tracking(1.5) // Adds precise kerning/letter-spacing for clean UI feel
+                            .foregroundColor(Color(hex: "000000").opacity(0.3))
+                            .tracking(1.5)
                         
-                        // 3. Right Divider Line
                         Divider()
                             .frame(width: 138, height: 1)
                             .overlay(Color(hex: "000000").opacity(0.2))
                     }
-                    .padding(.horizontal, 24) // Keeps the layout safely padded away from device screen margins
-                    .padding(.top, 20)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 24)
                     
                     Button(action: {
                         performGoogleSignIn()
                     }) {
                         HStack(spacing: 14) {
-                            // Google Brand Image Asset
                             Image("Google_logo")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: 40)
                             
-                            // Button Content Title Label (Static View instead of TextField input)
-                            Text("Signup with Google")
+                            Text("Login with Google")
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(Color.black) // Matches your layout color rules
+                                .foregroundColor(Color.black)
                         }
                         .padding(.horizontal, 24)
-                        .frame(width: 344, height: 60) // Retains your exact custom dimensions
+                        .frame(width: 344, height: 60)
                         .background(
                             Capsule()
                                 .fill(Color.white)
@@ -388,39 +345,42 @@ struct Registeration: View {
                     }
                     .padding(.top, 16)
                     
-                    // ── Login Link ──
+                    // ── Sign Up Link ──
                     HStack(spacing: 4) {
-                        Text("Already have an account?")
+                        Text("Don't have an account?")
                             .font(.system(size: 14, weight: .regular))
                             .foregroundColor(Color(hex: "595C5E"))
                         
                         Button(action: {
-                            navigateToLogin = true
+                            presentationMode.wrappedValue.dismiss()
                         }) {
-                            Text("Login here")
+                            Text("Sign up here")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(Color(hex: "006289"))
                         }
                     }
-                    .padding(.top, 14)
+                    .padding(.top, 24)
                     
-                    NavigationLink(destination: Login(), isActive: $navigateToLogin) {
+                    NavigationLink(destination: EmailVerificationView(), isActive: $navigateToVerification) {
                         EmptyView()
                     }
                 }
-                
             }
-            .padding(.top, 16)
-            
+            .padding(.top, 32)
         }
         .navigationBarBackButtonHidden(true)
-        
-        
-        
+        .onChange(of: viewModel.loginSuccess) { _, success in
+            if success {
+                if viewModel.isEmailVerified {
+                    isLoggedIn = true
+                } else {
+                    navigateToVerification = true
+                }
+            }
+        }
     }
 }
 
-
 #Preview {
-    Registeration()
+    Login()
 }

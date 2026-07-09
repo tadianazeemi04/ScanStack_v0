@@ -70,7 +70,8 @@ class RegistrationViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         
-        Auth.auth().createUser(withEmail: email, password: password) { [weak self] authResult, error in
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        Auth.auth().createUser(withEmail: trimmedEmail, password: password) { [weak self] authResult, error in
             guard let self = self else { return }
             
             if let error = error {
@@ -101,7 +102,7 @@ class RegistrationViewModel: ObservableObject {
             let userData: [String: Any] = [
                 "uid": user.uid,
                 "fullName": self.fullName,
-                "email": self.email,
+                "email": trimmedEmail,
                 "dateOfBirth": self.dateOfBirth,
                 "createdAt": Timestamp(date: Date())
             ]
