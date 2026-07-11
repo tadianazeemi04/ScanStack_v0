@@ -81,7 +81,7 @@ struct StartupView: View {
         ZStack {
             if showNextScreen {
                 if isLoggedIn {
-                    HomeScreen()
+                    MainTabBar()
                         .transition(.opacity)
                 } else {
                     Onboarding()
