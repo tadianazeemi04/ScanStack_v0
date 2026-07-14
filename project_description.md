@@ -56,3 +56,9 @@ When a user taps on an image within a Stack or Search result, they are presented
 
 ### 6. Settings Module
 - *Details pending further specification.*
+
+## Implementation Status (Updated July 2026)
+- **Scanning Engine**: Fully operational with CoreML categorization and Vision OCR extraction. Integrated into a sleek Activity UI with a custom dropdown picker.
+- **Stacks Organization**: Fully implemented with dynamic CoreData fetching, grouping images into categorized folders ("Recently" and "Other Stacks").
+- **Image Preview**: Implemented gallery-style full-screen viewer with a swipe-up Overview panel displaying all metadata and OCR text.
+- **Data Persistence**: Uses CoreData to save all image metadata and OCR results locally for fast retrieval.

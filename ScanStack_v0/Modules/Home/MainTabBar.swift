@@ -112,11 +112,11 @@ struct MainTabBar: View {
                     case .home:
                         HomeScreen()
                     case .activity:
-                        Text("Activity Screen")
+                        ActivityScreen()
                     case .search:
                         Text("Search Screen")
                     case .stacks:
-                        Text("Stacks Screen")
+                        StacksDashboardScreen()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
