@@ -45,42 +45,22 @@ struct ActivityScreen: View {
                     // MARK: - READY STATE
                     
                     // Smart Extraction Preview
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("SMART EXTRACTION")
-                            .font(.system(size: 14, weight: .heavy))
-                            .foregroundColor(.primary)
-                        
-                        HStack(spacing: 16) {
-                            Circle()
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                .frame(width: 44, height: 44)
-                                .overlay(
-                                    Image(systemName: "photo.on.rectangle")
-                                        .foregroundColor(Color("btn_gradiant_color_0"))
-                                )
+                    if !viewModel.extractionStats.isEmpty {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("SMART EXTRACTION")
+                                .font(.system(size: 14, weight: .heavy))
+                                .foregroundColor(.primary)
                             
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("13 new screenshot found")
-                                    .font(.system(size: 16, weight: .bold))
-                                Text("Start scanning")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.gray)
+                            VStack(spacing: 12) {
+                                ForEach(viewModel.extractionStats) { stat in
+                                    ExtractionItemRow(
+                                        icon: "doc.text", iconColor: Color("btn_gradiant_color_1"),
+                                        title: "\(stat.count) new items found",
+                                        subtitle: "Organized into \"\(stat.category)\""
+                                    )
+                                }
                             }
-                            
-                            Spacer()
-                            
-                            Circle()
-                                .fill(Color.green.opacity(0.2))
-                                .frame(width: 28, height: 28)
-                                .overlay(
-                                    Image(systemName: "checkmark")
-                                        .font(.system(size: 12, weight: .bold))
-                                        .foregroundColor(.green)
-                                )
                         }
-                        .padding(16)
-                        .background(Color(hex: "F8F9FA"))
-                        .cornerRadius(20)
                     }
                     
                     // MARK: - Scan Now Button

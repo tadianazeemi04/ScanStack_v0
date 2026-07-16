@@ -226,6 +226,7 @@ struct MainTabBar: View {
                     }
                 }
                 .padding(.horizontal, 20)
+                .frame(width: 378, height: 70)
                 .background(
                     Rectangle()
                     //                .padding(20)

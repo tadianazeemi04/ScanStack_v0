@@ -100,7 +100,7 @@ struct StacksDashboardScreen: View {
                         .shadow(color: Color("btn_gradiant_color_1").opacity(0.4), radius: 10, x: 0, y: 5)
                 }
                 .padding(.bottom, 90) // Padding above the tab bar
-                .padding(.top, 50) // Padding above the tab bar
+                .padding(.top, 650) // Padding above the tab bar
             }
         )
         .fullScreenCover(isPresented: $showCollectionScreen) {
@@ -118,43 +118,45 @@ struct DashboardStackCard: View {
         Button {
             showInsideStack = true
         } label: {
-            ZStack(alignment: .bottomLeading) {
-                if let coverImage = stack.coverImage {
-                    Image(uiImage: coverImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(height: 160)
-                        .clipped()
-                } else {
-                    Color.gray.opacity(0.2)
-                        .frame(height: 160)
-                }
-                
-                // Gradient overlay
-                LinearGradient(
-                    colors: [Color.black.opacity(0.8), Color.clear],
-                    startPoint: .bottom, endPoint: .center
+            Color.clear
+                .aspectRatio(1, contentMode: .fit)
+                .overlay(
+                    Group {
+                        if let coverImage = stack.coverImage {
+                            Image(uiImage: coverImage)
+                                .resizable()
+                                .scaledToFill()
+                        } else {
+                            Color.gray.opacity(0.2)
+                        }
+                    }
                 )
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(stack.name)
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
-                    Text("\(stack.count) images")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.white.opacity(0.8))
-                }
-                .padding(12)
-            }
-            .frame(height: 160)
-            .cornerRadius(20)
+                .overlay(
+                    LinearGradient(
+                        colors: [Color.black.opacity(0.8), Color.clear],
+                        startPoint: .bottom, endPoint: .center
+                    )
+                )
+                .overlay(
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(stack.name)
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        Text("\(stack.count) images")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                    .padding(16),
+                    alignment: .bottomLeading
+                )
+                .clipped()
+                .cornerRadius(20)
         }
         .buttonStyle(.plain)
         .fullScreenCover(isPresented: $showInsideStack) {
             InsideStackScreen(stack: stack)
         }
-        .padding(.leading, 80)
-        
     }
 }
 
@@ -174,104 +176,117 @@ struct StacksCollectionScreen: View {
     @StateObject private var viewModel = StacksViewModel()
     @Environment(\.dismiss) private var dismiss
     
+    @State private var selectedStack: StackGroup?
+    
     var body: some View {
         NavigationStack {
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 20) {
-                    
-                    // MARK: - Header
-                    HStack {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "arrow.left")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                        
-                        Spacer()
-                        
-                        Text("Stacks Collection")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                        
-                        Spacer()
-                        
-                        // Invisible placeholder for balance
-                        Image(systemName: "arrow.left")
+            VStack(spacing: 0) {
+                // MARK: - Sticky Header
+                HStack {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "arrow.uturn.backward")
                             .font(.system(size: 20, weight: .semibold))
-                            .opacity(0)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 18)
-                    .background(
-                        LinearGradient(
-                            colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
-                            startPoint: .leading, endPoint: .trailing
-                        )
-                    )
-                    
-                    if viewModel.allStacks.isEmpty {
-                        // MARK: - Empty State
-                        VStack(spacing: 16) {
-                            Image(systemName: "square.stack.3d.up.slash")
-                                .font(.system(size: 50))
-                                .foregroundColor(.gray.opacity(0.5))
-                            Text("No Stacks Yet")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.gray)
-                            Text("Go to Activity and scan some images\nto see your stacks here!")
-                                .font(.system(size: 14))
-                                .foregroundColor(.gray.opacity(0.7))
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 60)
-                        
-                    } else {
-                        // MARK: - Recently Section
-                        if !viewModel.recentStacks.isEmpty {
-                            Text("Recently")
-                                .font(.system(size: 18, weight: .heavy))
-                                .foregroundColor(.primary)
-                            
-                            ForEach(viewModel.recentStacks) { stack in
-                                NavigationLink(destination: InsideStackScreen(stack: stack)) {
-                                    StackCardView(stack: stack)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        
-                        // MARK: - Other Stacks Section
-                        if !viewModel.otherStacks.isEmpty {
-                            Text("Other Stacks")
-                                .font(.system(size: 18, weight: .heavy))
-                                .foregroundColor(.primary)
-                                .padding(.top, 4)
-                            
-                            ForEach(viewModel.otherStacks) { stack in
-                                NavigationLink(destination: InsideStackScreen(stack: stack)) {
-                                    StackCardView(stack: stack)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
+                            .foregroundColor(.white)
                     }
                     
-                    // Bottom padding for tab bar
-                    Spacer().frame(height: 20)
+                    Spacer()
+                    
+                    Text("Stacks Collection")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
+                    // Invisible placeholder for balance
+                    Image(systemName: "arrow.uturn.backward")
+                        .font(.system(size: 20, weight: .semibold))
+                        .opacity(0)
                 }
                 .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
+                        startPoint: .leading, endPoint: .trailing
+                    )
+                    .ignoresSafeArea(edges: .top)
+                )
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        
+                        if viewModel.allStacks.isEmpty {
+                            // MARK: - Empty State
+                            VStack(spacing: 16) {
+                                Image(systemName: "square.stack.3d.up.slash")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.gray.opacity(0.5))
+                                Text("No Stacks Yet")
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.gray)
+                                Text("Go to Activity and scan some images\nto see your stacks here!")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.gray.opacity(0.7))
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 60)
+                            
+                        } else {
+                            // MARK: - Recently Section
+                            if !viewModel.recentStacks.isEmpty {
+                                Text("Recently")
+                                    .font(.system(size: 18, weight: .heavy))
+                                    .foregroundColor(.primary)
+                                
+                                ForEach(viewModel.recentStacks) { stack in
+                                    Button {
+                                        selectedStack = stack
+                                    } label: {
+                                        StackCardView(stack: stack)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            
+                            // MARK: - Other Stacks Section
+                            if !viewModel.otherStacks.isEmpty {
+                                Text("Other Stacks")
+                                    .font(.system(size: 18, weight: .heavy))
+                                    .foregroundColor(.primary)
+                                    .padding(.top, 4)
+                                
+                                ForEach(viewModel.otherStacks) { stack in
+                                    Button {
+                                        selectedStack = stack
+                                    } label: {
+                                        StackCardView(stack: stack)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                        
+                        // Bottom padding for tab bar
+                        Spacer().frame(height: 100)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                }
             }
             .navigationBarHidden(true)
+        }
+        .fullScreenCover(item: $selectedStack) { stack in
+            InsideStackScreen(stack: stack)
         }
         .onAppear {
             viewModel.fetchStacks()
         }
     }
 }
-
 // MARK: - Stack Card View (used in the collection list)
 struct StackCardView: View {
     let stack: StackGroup

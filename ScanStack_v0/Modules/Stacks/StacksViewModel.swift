@@ -39,6 +39,12 @@ class StacksViewModel: ObservableObject {
     
     private let context = PersistenceController.shared.container.viewContext
     
+    init() {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("FavoritesChanged"), object: nil, queue: .main) { [weak self] _ in
+            self?.fetchStacks()
+        }
+    }
+    
     func fetchStacks() {
         let request: NSFetchRequest<ScannedDocument> = ScannedDocument.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(keyPath: \ScannedDocument.dateCreated, ascending: false)]
@@ -49,8 +55,22 @@ class StacksViewModel: ObservableObject {
             // Group by stackName
             let grouped = Dictionary(grouping: allDocs) { $0.stackName ?? "Uncategorized" }
             
-            let stacks = grouped.map { StackGroup(name: $0.key, documents: $0.value) }
+            var stacks = grouped.map { StackGroup(name: $0.key, documents: $0.value) }
                 .sorted { $0.latestDate > $1.latestDate }
+            
+            // Inject "My Favorite" stack if there are favorites
+            let favoriteIDs = UserDefaults.standard.stringArray(forKey: "FavoriteDocumentIDs") ?? []
+            let favoriteDocs = allDocs.filter { doc in
+                if let idString = doc.id?.uuidString {
+                    return favoriteIDs.contains(idString)
+                }
+                return false
+            }
+            
+            let favoriteStack = StackGroup(name: "My Favorite", documents: favoriteDocs)
+            // Remove it if it somehow exists to avoid duplicates, then prepend
+            stacks.removeAll { $0.name == "My Favorite" }
+            stacks.insert(favoriteStack, at: 0)
             
             self.allStacks = stacks
             

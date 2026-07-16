@@ -77,9 +77,7 @@ struct ImagePreview: View {
                     
                     // Favorite Button
                     Button {
-                        withAnimation(.spring(response: 0.3)) {
-                            isFavorited.toggle()
-                        }
+                        toggleFavorite()
                     } label: {
                         ZStack {
                             Circle()
@@ -156,6 +154,34 @@ struct ImagePreview: View {
                     }
                 }
         )
+        .onAppear {
+            checkFavoriteState()
+        }
+    }
+    
+    // MARK: - Favorite Logic
+    private func checkFavoriteState() {
+        guard let idString = document.id?.uuidString else { return }
+        let favoriteIDs = UserDefaults.standard.stringArray(forKey: "FavoriteDocumentIDs") ?? []
+        isFavorited = favoriteIDs.contains(idString)
+    }
+    
+    private func toggleFavorite() {
+        guard let idString = document.id?.uuidString else { return }
+        var favoriteIDs = UserDefaults.standard.stringArray(forKey: "FavoriteDocumentIDs") ?? []
+        
+        withAnimation(.spring(response: 0.3)) {
+            if isFavorited {
+                favoriteIDs.removeAll { $0 == idString }
+                isFavorited = false
+            } else {
+                favoriteIDs.append(idString)
+                isFavorited = true
+            }
+        }
+        
+        UserDefaults.standard.set(favoriteIDs, forKey: "FavoriteDocumentIDs")
+        NotificationCenter.default.post(name: NSNotification.Name("FavoritesChanged"), object: nil)
     }
     
     // MARK: - Overview Sheet View
