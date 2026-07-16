@@ -12,6 +12,7 @@
 		6A4D615C2FFB915100D77DF0 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6A4D615B2FFB915100D77DF0 /* FirebaseAnalytics */; };
 		6A4D61C72FFBB87B00D77DF0 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 6A4D61C62FFBB87B00D77DF0 /* FirebaseAuth */; };
 		6A4D61C92FFBB88700D77DF0 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6A4D61C82FFBB88700D77DF0 /* FirebaseFirestore */; };
+		6A541F9F3009097900C29094 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 6A541F9E3009097900C29094 /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6A541F9F3009097900C29094 /* GoogleMobileAds in Frameworks */,
 				6A0A9E552FF676300012EA07 /* GoogleSignIn in Frameworks */,
 				6A0A9E572FF676300012EA07 /* GoogleSignInSwift in Frameworks */,
 				6A4D615C2FFB915100D77DF0 /* FirebaseAnalytics in Frameworks */,
@@ -91,6 +93,7 @@
 				6A4D615B2FFB915100D77DF0 /* FirebaseAnalytics */,
 				6A4D61C62FFBB87B00D77DF0 /* FirebaseAuth */,
 				6A4D61C82FFBB88700D77DF0 /* FirebaseFirestore */,
+				6A541F9E3009097900C29094 /* GoogleMobileAds */,
 			);
 			productName = ScanStack_v0;
 			productReference = 6AAA600D2FB58A83005D42D7 /* ScanStack_v0.app */;
@@ -123,6 +126,7 @@
 			packageReferences = (
 				6A0A9E532FF676300012EA07 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				6A4D615A2FFB915100D77DF0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				6A541F9D3009097900C29094 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6AAA600E2FB58A83005D42D7 /* Products */;
@@ -285,6 +289,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ScanStack-v0-Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to scan documents.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photos to scan screenshots.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -319,6 +325,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ScanStack-v0-Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to scan documents.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photos to scan screenshots.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -382,6 +390,14 @@
 				minimumVersion = 12.15.0;
 			};
 		};
+		6A541F9D3009097900C29094 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -409,6 +425,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6A4D615A2FFB915100D77DF0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		6A541F9E3009097900C29094 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6A541F9D3009097900C29094 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

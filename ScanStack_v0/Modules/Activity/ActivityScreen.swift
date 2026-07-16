@@ -70,8 +70,13 @@ struct ActivityScreen: View {
                     // MARK: - Scan Now Button
                     Button {
                         print("✅ Scan Now button tapped!")
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                            showScanOptions.toggle()
+                        // Ask for Photo Library permission immediately when Scan Now is clicked
+                        PHPhotoLibrary.requestAuthorization(for: .readWrite) { _ in
+                            DispatchQueue.main.async {
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                    showScanOptions.toggle()
+                                }
+                            }
                         }
                     } label: {
                         HStack {
@@ -149,9 +154,11 @@ struct ActivityScreen: View {
                         .transition(.opacity.combined(with: .move(edge: .top)).combined(with: .scale(scale: 0.95, anchor: .top)))
                     }
                     
-                    // Ads Placeholder
-                    AdsPlaceholderView()
-                    
+                    // Banner Ad Placeholder
+                    BannerAdView(adUnitID: "ca-app-pub-3940256099942544/2934735716")
+                        .frame(height: 50)
+                        .padding(.vertical, 8)
+                        
                 } else {
                     // MARK: - SCANNING STATE
                     
@@ -208,9 +215,11 @@ struct ActivityScreen: View {
                     .cornerRadius(24)
                     .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                     
-                    // Ads Placeholder
-                    AdsPlaceholderView()
-                    
+                    // Banner Ad Placeholder
+                    BannerAdView(adUnitID: "ca-app-pub-3940256099942544/2934735716")
+                        .frame(height: 50)
+                        .padding(.vertical, 8)
+                        
                     // Smart Extraction List
                     VStack(alignment: .leading, spacing: 16) {
                         Text("SMART EXTRACTION")
@@ -243,14 +252,16 @@ struct ActivityScreen: View {
         // MARK: - Sheets & Pickers (attached to ScrollView directly)
         .sheet(isPresented: $showLimitPopup) {
             LimitPopupScreen(onWatchAdSelected: {
-                showAdScreen = true
+                showLimitPopup = false
+                
+                // Wait for the sheet to disappear before presenting the full-screen Ad
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    RewardedAdManager.shared.showAd {
+                        viewModel.scanAllScreenshots()
+                    }
+                }
             })
             .presentationDetents([.height(450)])
-        }
-        .fullScreenCover(isPresented: $showAdScreen) {
-            AdScreen(onAdCompleted: {
-                viewModel.scanAllScreenshots()
-            })
         }
         .sheet(isPresented: $showCamera) {
             CameraPicker(selectedImage: $selectedCameraImage)
@@ -287,6 +298,9 @@ struct ActivityScreen: View {
                 }
                 selectedAlbumPhotos = []
             }
+        }
+        .onAppear {
+            RewardedAdManager.shared.loadAd()
         }
     }
     

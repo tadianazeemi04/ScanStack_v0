@@ -27,7 +27,7 @@ struct LimitPopupScreen: View {
                 
                 // Content
                 VStack(spacing: 16) {
-                    Image(systemName: "rectangle.stack.fill.badge.lock")
+                    Image(systemName: "lock.rectangle.stack.fill")
                         .font(.system(size: 60))
                         .foregroundStyle(
                             LinearGradient(
