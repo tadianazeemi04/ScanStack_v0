@@ -32,24 +32,8 @@ struct ImagePreview: View {
             // MARK: - Black Background
             Color.black.ignoresSafeArea()
             
-            // MARK: - Full Screen Image
-            if let image = savedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                VStack(spacing: 12) {
-                    Image(systemName: "photo.fill")
-                        .font(.system(size: 60))
-                        .foregroundColor(.gray)
-                    Text("Image not found")
-                        .foregroundColor(.gray)
-                }
-            }
-            
-            // MARK: - Top Bar (Back + Name + Heart)
-            VStack {
+            VStack(spacing: 0) {
+                // MARK: - Top Bar (Back + Name + Heart)
                 HStack {
                     // Back Button
                     Button {
@@ -92,45 +76,72 @@ struct ImagePreview: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 8)
+                .padding(.bottom, 12)
+                .background(Color.black.ignoresSafeArea(edges: .top))
                 
-                Spacer()
-            }
-            
-            // MARK: - Bottom: Overview Button + Swipe Hint
-            VStack {
-                Spacer()
-                
-                // Overview pill button
-                Button {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        showOverview = true
+                // MARK: - Full Screen Image
+                if let image = savedImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .clipped()
+                } else {
+                    VStack(spacing: 12) {
+                        Image(systemName: "photo.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.gray)
+                        Text("Image not found")
+                            .foregroundColor(.gray)
                     }
-                } label: {
-                    Text("Overview")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 32)
-                        .padding(.vertical, 12)
-                        .background(
-                            LinearGradient(
-                                colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
-                                startPoint: .leading, endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(25)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .buttonStyle(.plain)
                 
-                // Swipe hint
-                HStack(spacing: 6) {
-                    Image(systemName: "chevron.compact.up")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text("Swipe up to see details")
-                        .font(.system(size: 13, weight: .medium))
+                // MARK: - Bottom: Overview Button + Swipe Hint
+                ZStack(alignment: .top) {
+                    // White card background
+                    VStack {
+                        Spacer().frame(height: 24)
+                        
+                        VStack(spacing: 8) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "chevron.compact.up")
+                                    .font(.system(size: 14, weight: .bold))
+                                Text("Swipe up to see details")
+                                    .font(.system(size: 13, weight: .bold))
+                            }
+                            .foregroundColor(.primary)
+                            .padding(.top, 30)
+                            .padding(.bottom, 30)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .background(Color(UIColor.systemBackground))
+                        .cornerRadius(32, corners: [.topLeft, .topRight])
+                    }
+                    
+                    // Overview pill button
+                    Button {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            showOverview = true
+                        }
+                    } label: {
+                        Text("Overview")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 40)
+                            .padding(.vertical, 14)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
+                                    startPoint: .leading, endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(25)
+                            .shadow(color: Color("btn_gradiant_color_1").opacity(0.4), radius: 10, x: 0, y: 4)
+                    }
+                    .buttonStyle(.plain)
+                    .offset(y: 4)
                 }
-                .foregroundColor(.white.opacity(0.7))
-                .padding(.top, 8)
-                .padding(.bottom, 20)
             }
             
             // MARK: - Overview Sheet (slides up from bottom)

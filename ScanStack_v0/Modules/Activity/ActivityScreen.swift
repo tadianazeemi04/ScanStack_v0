@@ -21,6 +21,10 @@ struct ActivityScreen: View {
     @State private var selectedSinglePhoto: PhotosPickerItem? = nil
     @State private var selectedAlbumPhotos: [PhotosPickerItem] = []
     
+    // Ad Flow State
+    @State private var showLimitPopup = false
+    @State private var showAdScreen = false
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
@@ -126,6 +130,18 @@ struct ActivityScreen: View {
                                 withAnimation { showScanOptions = false }
                                 showAlbumPhoto = true
                             }
+                            
+                            Divider().padding(.horizontal, 16)
+                            
+                            ScanOptionButton(
+                                icon: "lock.fill",
+                                title: "All Screenshots",
+                                subtitle: "Extract from all screenshots"
+                            ) {
+                                print("✅ All Screenshots selected")
+                                withAnimation { showScanOptions = false }
+                                showLimitPopup = true
+                            }
                         }
                         .background(Color(hex: "F8F9FA"))
                         .cornerRadius(20)
@@ -225,6 +241,17 @@ struct ActivityScreen: View {
             .padding(.horizontal, 24)
         }
         // MARK: - Sheets & Pickers (attached to ScrollView directly)
+        .sheet(isPresented: $showLimitPopup) {
+            LimitPopupScreen(onWatchAdSelected: {
+                showAdScreen = true
+            })
+            .presentationDetents([.height(450)])
+        }
+        .fullScreenCover(isPresented: $showAdScreen) {
+            AdScreen(onAdCompleted: {
+                viewModel.scanAllScreenshots()
+            })
+        }
         .sheet(isPresented: $showCamera) {
             CameraPicker(selectedImage: $selectedCameraImage)
                 .ignoresSafeArea()

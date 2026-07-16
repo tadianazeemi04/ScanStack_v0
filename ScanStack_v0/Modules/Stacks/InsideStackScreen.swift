@@ -75,21 +75,14 @@ struct InsideStackScreen: View {
                         ForEach(sortedDocuments, id: \.id) { doc in
                             NavigationLink(destination: ImagePreview(document: doc)) {
                                 ImageThumbnailView(document: doc)
+                                    .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
+                            .contentShape(Rectangle())
                         }
                     }
                     .padding(.horizontal, 16)
-                    
-                    // Page dots indicator (placeholder for future pagination)
-                    HStack(spacing: 6) {
-                        ForEach(0..<min(5, max(1, sortedDocuments.count / 9 + 1)), id: \.self) { index in
-                            Circle()
-                                .fill(index == 0 ? Color.primary : Color.gray.opacity(0.3))
-                                .frame(width: 6, height: 6)
-                        }
-                    }
-                    .padding(.vertical, 8)
+                    .padding(.bottom, 16)
                     
                     // Ads Placeholder
                     AdsPlaceholderView()

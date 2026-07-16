@@ -3,12 +3,12 @@
 *This document tracks the ongoing development progress, tasks to be completed, and a timestamped log of what has been accomplished.*
 
 ## Task Checklist (Next 48 Hours)
-- [ ] **Home Screen:** UI layout and basic navigation.
+- [x] **Home Screen:** UI layout and basic navigation.
 - [x] **Scanning Module:** Album selection, ML Classification integration, Vision OCR integration, and summary report generation.
 - [x] **Stacks Module:** Folder UI and logic to display images categorized by the ML model.
 - [x] **Image Preview:** UI to show image, metadata (size, path, date), and OCR text.
-- [ ] **Search Module:** Search bar and logic to filter by OCR text and Stack names.
-- [ ] **Settings:** *Pending requirements.*
+- [x] **Search Module:** Search bar and logic to filter by OCR text and Stack names.
+- [x] **Settings:** Profile UI, Premium Card, dynamic Core Data Storage Insights, and global Face ID App Lock.
 
 ---
 
@@ -42,3 +42,33 @@
 - **Image Preview Module:**
   - Designed full-screen image preview with a swipe-up "Overview" pane.
   - Displayed detailed metadata (Name, Date, Path, Size, Stack Name) and raw extracted OCR text using custom UI matching premium mockups.
+
+**[2026-07-16]**
+- **UI Polish & Navigation Fixes:**
+  - **Image Preview Restructure:** Redesigned `ImagePreview.swift` to use a strict `VStack` layout. Added a solid black header to prevent the image from bleeding into navigation controls. Implemented a bottom floating "Overview" button overlaying a solid white card layout to perfectly match the Figma design.
+  - **Favorites System:** Implemented a persistent "Heart" favorite system in `ImagePreview` connected to `UserDefaults`. Synthesized a permanent **"My Favorite"** stack pinned to the top of the Dashboard and Collections, which dynamically updates via `NotificationCenter` broadcasts.
+  - **Collection Screen Bug Fixes:** Fixed unresponsive touch bounds by adding `.contentShape(Rectangle())` to custom stack cards. Resolved a major navigation bug by replacing the nested `NavigationStack` with `.fullScreenCover` in `StacksCollectionScreen`.
+  - **Activity Screen Dynamic State:** Replaced the hard-coded "13 new screenshots found" placeholder with a dynamic list that accurately persists and displays the `extractionStats` from the most recent scan.
+- **Search Module:**
+  - Built `SearchViewModel.swift` using Combine to debounce search queries for optimal performance, checking Core Data against `extractedText` and `stackName`.
+  - Built `SearchScreen.swift` featuring a custom search bar, dynamic empty/no-results states, and a 3-column `LazyVGrid` mimicking the Stacks UI.
+  - Wired search results directly to `ImagePreview` via full-screen cover navigation.
+- **Home Screen Module:**
+  - Replaced placeholder view with a rich dashboard layout.
+  - Built `HomeViewModel.swift` to fetch user's display name from Firebase Auth and calculate total scans/stacks from Core Data.
+  - Built `HomeScreen.swift` featuring a custom greeting, two glassmorphism stat cards, a horizontally scrolling "Recent Activity" carousel, and an integrated top-right Log Out button.
+  - Wired recent scan thumbnails to launch `ImagePreview` via `.fullScreenCover`.
+- **Settings Module & App Lock:**
+  - Designed and built `SettingsScreen.swift` mirroring the Figma UI (Profile header, Premium Card, Storage Insights).
+  - Implemented `SettingsViewModel.swift` to compute physical device storage used by saved Core Data documents.
+  - Designed `SecuritySettingsScreen.swift` featuring a toggle switch for global App Lock.
+  - Built `AppLockManager.swift` leveraging `LAContext` to integrate Face ID, Touch ID, or Passcode.
+  - Intercepted `.scenePhase` in `StartupView.swift` to enforce global App Lock anytime the app is backgrounded.
+- **Subscription Module:**
+  - Built `SubscriptionScreen.swift` matching the new Figma design (gradient header, highlighted Pro card with custom overlapping badge, Basic tier card).
+  - Updated `SettingsScreen.swift` to route to the Pricing Plans view when tapping the Manage Subscription or Pricing Plans buttons.
+- **Ads & Screenshots Extraction:**
+  - Added "All Screenshots" option to the Activity tab dropdown.
+  - Built `LimitPopupScreen.swift` restricting full extractions behind an Ad Wall.
+  - Built `AdScreen.swift` with a strict 30-second timer and hidden close button logic.
+  - Upgraded `ScanningViewModel` to use `PhotoKit` to fetch `PHAsset`s natively from the user's hidden Screenshots album.

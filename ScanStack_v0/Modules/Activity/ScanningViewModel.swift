@@ -5,6 +5,7 @@ import UIKit
 import CoreData
 import Combine
 import SwiftUI
+import Photos
 
 @MainActor
 class ScanningViewModel: ObservableObject {
@@ -22,6 +23,42 @@ class ScanningViewModel: ObservableObject {
         let id = UUID()
         let category: String
         var count: Int
+    }
+    
+    func scanAllScreenshots() {
+        PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] status in
+            guard status == .authorized || status == .limited else { return }
+            
+            let fetchOptions = PHFetchOptions()
+            let smartAlbums = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumScreenshots, options: fetchOptions)
+            
+            guard let screenshotsAlbum = smartAlbums.firstObject else { return }
+            
+            let assetsFetchResult = PHAsset.fetchAssets(in: screenshotsAlbum, options: nil)
+            var imagesToProcess: [UIImage] = []
+            let manager = PHImageManager.default()
+            let requestOptions = PHImageRequestOptions()
+            // We use synchronous fetching on this background thread to compile the list
+            requestOptions.isSynchronous = true
+            requestOptions.deliveryMode = .highQualityFormat
+            
+            // Limit to recent 20 for safety against memory crashes on real devices with 10k screenshots, 
+            // since we are fetching UIImages directly in memory.
+            let limit = min(assetsFetchResult.count, 20)
+            
+            for i in 0..<limit {
+                let asset = assetsFetchResult.object(at: i)
+                manager.requestImage(for: asset, targetSize: CGSize(width: 800, height: 800), contentMode: .aspectFit, options: requestOptions) { image, _ in
+                    if let img = image {
+                        imagesToProcess.append(img)
+                    }
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self?.processImages(imagesToProcess)
+            }
+        }
     }
     
     func processImages(_ images: [UIImage]) {

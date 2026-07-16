@@ -14,6 +14,7 @@ enum MainTab {
 
 struct MainTabBar: View {
     @State private var selectedTab: MainTab = .home
+    @State private var showSettings = false
     
     var body: some View {
         
@@ -37,23 +38,9 @@ struct MainTabBar: View {
                     Spacer()
                     
                     // Profile Image
-                    Menu {
-                        Button(action: {
-                            // Settings action will go here
-                        }) {
-                            Label("Settings", systemImage: "gearshape")
-                        }
-                        
-                        Button(role: .destructive, action: {
-                            do {
-                                try Auth.auth().signOut()
-                            } catch {
-                                print("Error signing out: \\(error.localizedDescription)")
-                            }
-                        }) {
-                            Label("Log Out", systemImage: "rectangle.portrait.and.arrow.right")
-                        }
-                    } label: {
+                    Button(action: {
+                        showSettings = true
+                    }) {
                         if let photoURL = Auth.auth().currentUser?.photoURL {
                             AsyncImage(url: photoURL) { phase in
                                 switch phase {
@@ -114,7 +101,7 @@ struct MainTabBar: View {
                     case .activity:
                         ActivityScreen()
                     case .search:
-                        Text("Search Screen")
+                        SearchScreen()
                     case .stacks:
                         StacksDashboardScreen()
                     }
@@ -238,6 +225,9 @@ struct MainTabBar: View {
                 )
                 
             }
+        }
+        .fullScreenCover(isPresented: $showSettings) {
+            SettingsScreen()
         }
     }
 }

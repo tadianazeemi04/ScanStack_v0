@@ -132,10 +132,7 @@ struct DashboardStackCard: View {
                     }
                 )
                 .overlay(
-                    LinearGradient(
-                        colors: [Color.black.opacity(0.8), Color.clear],
-                        startPoint: .bottom, endPoint: .center
-                    )
+                    Color.black.opacity(0.44)
                 )
                 .overlay(
                     VStack(alignment: .leading, spacing: 4) {
@@ -314,13 +311,8 @@ struct StackCardView: View {
                 )
             }
             
-            // Bottom gradient overlay for text readability
-            LinearGradient(
-                colors: [Color.black.opacity(0.7), Color.clear],
-                startPoint: .bottom, endPoint: .center
-            )
-            .frame(height: 100)
-            .frame(maxHeight: .infinity, alignment: .bottom)
+            // Uniform overlay for text readability (Figma spec: 44% black)
+            Color.black.opacity(0.44)
             
             // Stack name + count
             VStack(alignment: .leading, spacing: 2) {

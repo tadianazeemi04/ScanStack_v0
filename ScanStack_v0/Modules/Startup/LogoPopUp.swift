@@ -77,6 +77,9 @@ struct StartupView: View {
     @State private var showNextScreen = false
     @AppStorage("isLoggedIn") private var isLoggedIn = false
     
+    @Environment(\.scenePhase) var scenePhase
+    @StateObject private var lockManager = AppLockManager.shared
+    
     var body: some View {
         ZStack {
             if showNextScreen {
@@ -98,6 +101,53 @@ struct StartupView: View {
                             }
                         }
                     }
+            }
+            
+            // MARK: - Global App Lock Overlay
+            if lockManager.isAppLockEnabled && !lockManager.isUnlocked {
+                ZStack {
+                    // Blur the background entirely
+                    Color.black.opacity(0.8)
+                        .ignoresSafeArea()
+                        .background(.ultraThinMaterial)
+                    
+                    VStack(spacing: 20) {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.white)
+                        
+                        Text("ScanStack is Locked")
+                            .font(.title2)
+                            .bold()
+                            .foregroundColor(.white)
+                        
+                        Button {
+                            lockManager.authenticate()
+                        } label: {
+                            Text("Unlock")
+                                .font(.headline)
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 40)
+                                .padding(.vertical, 14)
+                                .background(Color.white)
+                                .cornerRadius(25)
+                        }
+                    }
+                }
+                .transition(.opacity)
+                .zIndex(100) // Ensure it covers everything
+                .onAppear {
+                    lockManager.authenticate()
+                }
+            }
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .background || newPhase == .inactive {
+                lockManager.requireAuthentication()
+            } else if newPhase == .active {
+                if lockManager.isAppLockEnabled && !lockManager.isUnlocked {
+                    lockManager.authenticate()
+                }
             }
         }
     }
