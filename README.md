@@ -200,5 +200,5 @@ This project is developed as a **Final Year Project (FYP)** and is intended for 
 ---
 
 <p align="center">
-  Built with ❤️ using Swift & SwiftUI
+  Built with ❤️ by <strong>Tadian Ahmad Azeemi</strong>
 </p>
