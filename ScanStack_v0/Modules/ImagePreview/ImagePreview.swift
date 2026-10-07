@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import Photos
 
 struct ImagePreview: View {
     // The scanned document data
@@ -19,12 +20,62 @@ struct ImagePreview: View {
     @State private var showOverview = false
     @State private var dragOffset: CGFloat = 0
     
-    // Computed: load the saved image from Documents
+    // Open path dialog & share sheet states
+    @State private var showOpenPathDialog = false
+    @State private var showShareSheet = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    
+    // Computed: load the saved image from Documents or originalPath
     private var savedImage: UIImage? {
-        guard let imageName = document.imageName else { return nil }
-        let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent(imageName)
-        return UIImage(contentsOfFile: path.path)
+        if let imageName = document.imageName, !imageName.isEmpty {
+            let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent(imageName)
+            if let img = UIImage(contentsOfFile: path.path) {
+                return img
+            }
+        }
+        if let originalPath = document.originalPath, !originalPath.isEmpty {
+            if let img = UIImage(contentsOfFile: originalPath) {
+                return img
+            }
+        }
+        return nil
+    }
+    
+    // Computed: resolve local file URL for sharing / file manager
+    private var fileURL: URL? {
+        if let imageName = document.imageName, !imageName.isEmpty {
+            let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let path = docDir.appendingPathComponent(imageName)
+            if FileManager.default.fileExists(atPath: path.path) {
+                return path
+            }
+        }
+        if let originalPath = document.originalPath, !originalPath.isEmpty {
+            let path = URL(fileURLWithPath: originalPath)
+            if FileManager.default.fileExists(atPath: path.path) {
+                return path
+            }
+        }
+        // Ensure image data exists on disk if only in memory
+        if let image = savedImage {
+            let filename = document.imageName ?? (UUID().uuidString + ".jpg")
+            let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let path = docDir.appendingPathComponent(filename)
+            if let data = image.jpegData(compressionQuality: 0.9) {
+                try? data.write(to: path)
+                return path
+            }
+        }
+        return nil
+    }
+    
+    private var displayPath: String {
+        if let path = fileURL?.path {
+            return path
+        }
+        return document.originalPath ?? (document.imageName ?? "N/A")
     }
     
     var body: some View {
@@ -168,6 +219,34 @@ struct ImagePreview: View {
         .onAppear {
             checkFavoriteState()
         }
+        .confirmationDialog("Open Image", isPresented: $showOpenPathDialog, titleVisibility: .visible) {
+            Button("Open in Photos (Gallery)") {
+                openInGallery()
+            }
+            Button("Open in Files (File Manager)") {
+                openInFileManager()
+            }
+            Button("Save to Files / Share...") {
+                showShareSheet = true
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Open image in Gallery or File Manager, or export it using the system share sheet.")
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if let url = fileURL {
+                ShareSheet(activityItems: [url])
+            } else if let image = savedImage {
+                ShareSheet(activityItems: [image])
+            }
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("Notice"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
     }
     
     // MARK: - Favorite Logic
@@ -260,7 +339,7 @@ struct ImagePreview: View {
                                     Text("Path:")
                                         .font(.system(size: 13))
                                         .foregroundColor(.gray)
-                                    Text(document.originalPath ?? "N/A")
+                                    Text(displayPath)
                                         .font(.system(size: 15, weight: .semibold))
                                         .foregroundColor(.primary)
                                         .lineLimit(2)
@@ -269,19 +348,24 @@ struct ImagePreview: View {
                                 Spacer()
                                 
                                 // Open path button
-                                VStack(spacing: 2) {
-                                    Image(systemName: "arrow.up.right")
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundStyle(
-                                            LinearGradient(
-                                                colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
-                                                startPoint: .leading, endPoint: .trailing
+                                Button {
+                                    showOpenPathDialog = true
+                                } label: {
+                                    VStack(spacing: 2) {
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundStyle(
+                                                LinearGradient(
+                                                    colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
+                                                    startPoint: .leading, endPoint: .trailing
+                                                )
                                             )
-                                        )
-                                    Text("open path")
-                                        .font(.system(size: 10, weight: .medium))
-                                        .foregroundColor(Color("btn_gradiant_color_1"))
+                                        Text("open path")
+                                            .font(.system(size: 10, weight: .medium))
+                                            .foregroundColor(Color("btn_gradiant_color_1"))
+                                    }
                                 }
+                                .buttonStyle(.plain)
                             }
                             .padding(.horizontal, 20)
                             .padding(.vertical, 14)
@@ -358,6 +442,105 @@ struct ImagePreview: View {
         formatter.dateFormat = "MMM dd, yyyy  h:mm a"
         return formatter.string(from: date)
     }
+    
+    // MARK: - Open in Gallery & File Manager
+    private func openInGallery() {
+        guard let image = savedImage else {
+            alertMessage = "Unable to load image."
+            showAlert = true
+            return
+        }
+        
+        let status = PHPhotoLibrary.authorizationStatus(for: .addOnly)
+        switch status {
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization(for: .addOnly) { newStatus in
+                if newStatus == .authorized || newStatus == .limited {
+                    saveAndOpenPhotos(image: image)
+                } else {
+                    DispatchQueue.main.async {
+                        alertMessage = "Photo library access is needed to save and open in Gallery."
+                        showAlert = true
+                    }
+                }
+            }
+        case .authorized, .limited:
+            saveAndOpenPhotos(image: image)
+        case .denied, .restricted:
+            alertMessage = "Photo Library access is denied. Please allow Photos access in Settings."
+            showAlert = true
+        @unknown default:
+            break
+        }
+    }
+    
+    private func saveAndOpenPhotos(image: UIImage) {
+        PHPhotoLibrary.shared().performChanges({
+            PHAssetChangeRequest.creationRequestForAsset(from: image)
+        }) { success, error in
+            DispatchQueue.main.async {
+                if success {
+                    if let photosURL = URL(string: "photos-redirect://") {
+                        UIApplication.shared.open(photosURL, options: [:]) { opened in
+                            if !opened {
+                                alertMessage = "Image saved to Photos! Open the Photos app to view."
+                                showAlert = true
+                            }
+                        }
+                    } else {
+                        alertMessage = "Image saved to Photos gallery."
+                        showAlert = true
+                    }
+                } else {
+                    alertMessage = error?.localizedDescription ?? "Failed to save image to Photos."
+                    showAlert = true
+                }
+            }
+        }
+    }
+    
+    private func openInFileManager() {
+        guard let _ = fileURL else {
+            alertMessage = "Image file could not be found on disk."
+            showAlert = true
+            return
+        }
+        
+        if let filesURL = URL(string: "shareddocuments://") {
+            UIApplication.shared.open(filesURL, options: [:]) { opened in
+                if !opened {
+                    DispatchQueue.main.async {
+                        showShareSheet = true
+                    }
+                }
+            }
+        } else {
+            showShareSheet = true
+        }
+    }
+}
+
+// MARK: - Share Sheet UIViewControllerRepresentable
+struct ShareSheet: UIViewControllerRepresentable {
+    let activityItems: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: activityItems,
+            applicationActivities: nil
+        )
+        if let popover = controller.popoverPresentationController {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                popover.sourceView = rootVC.view
+                popover.sourceRect = CGRect(x: UIScreen.main.bounds.midX, y: UIScreen.main.bounds.midY, width: 0, height: 0)
+                popover.permittedArrowDirections = []
+            }
+        }
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Overview Row Helper

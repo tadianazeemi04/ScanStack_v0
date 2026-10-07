@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SubscriptionScreen: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var showComingSoonAlert = false
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -86,7 +87,7 @@ struct SubscriptionScreen: View {
                                 
                                 // Upgrade Button
                                 Button {
-                                    // Action
+                                    showComingSoonAlert = true
                                 } label: {
                                     Text("UPGRADE TO PRO")
                                         .font(.system(size: 15, weight: .bold))
@@ -172,6 +173,11 @@ struct SubscriptionScreen: View {
                     }
                 }
             }
+        }
+        .alert("Coming Soon", isPresented: $showComingSoonAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("ScanStack Pro is coming soon! Stay tuned for upcoming updates.")
         }
     }
 }

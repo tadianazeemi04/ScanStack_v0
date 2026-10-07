@@ -21,6 +21,17 @@
 	<string>529338335154-ub8h752juku71q80bt03sb494oigu5q6.apps.googleusercontent.com</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>ScanStack needs access to your photo library to scan, organize, and categorize your screenshots.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>ScanStack needs permission to save images to your Photos gallery.</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>photos-redirect</string>
+		<string>shareddocuments</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>ScanStack needs camera access to allow you to capture and instantly categorize documents or screens.</string>
 	<key>NSFaceIDUsageDescription</key>
