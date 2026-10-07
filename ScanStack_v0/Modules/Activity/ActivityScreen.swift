@@ -154,7 +154,7 @@ struct ActivityScreen: View {
                         .transition(.opacity.combined(with: .move(edge: .top)).combined(with: .scale(scale: 0.95, anchor: .top)))
                     }
                     
-                    // Banner Ad Placeholder
+                    // Banner Ad
                     BannerAdView(adUnitID: "ca-app-pub-3940256099942544/2934735716")
                         .frame(height: 50)
                         .padding(.vertical, 8)
@@ -215,7 +215,7 @@ struct ActivityScreen: View {
                     .cornerRadius(24)
                     .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
                     
-                    // Banner Ad Placeholder
+                    // Banner Ad
                     BannerAdView(adUnitID: "ca-app-pub-3940256099942544/2934735716")
                         .frame(height: 50)
                         .padding(.vertical, 8)

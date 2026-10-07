@@ -13,9 +13,44 @@ struct StacksDashboardScreen: View {
     // State to control full-screen presentation of the collection screen
     @State private var showCollectionScreen = false
     
-    // Selected category pill (mock functionality for UI)
+    // Selected category pill
     @State private var selectedCategory = "Recent"
-    let categories = ["Recent", "All Stacks", "Food", "Emails"]
+    
+    // Category pills: default common categories plus any dynamically detected stack categories
+    private var categories: [String] {
+        var list = ["Recent", "All Stacks", "Food", "Emails"]
+        for stack in viewModel.allStacks {
+            if stack.name != "My Favorite" && !list.contains(stack.name) {
+                list.append(stack.name)
+            }
+        }
+        return list
+    }
+    
+    // Stacks filtered by the selected category
+    private var filteredStacks: [StackGroup] {
+        switch selectedCategory {
+        case "Recent":
+            return viewModel.recentStacks.isEmpty ? Array(viewModel.allStacks.prefix(4)) : viewModel.recentStacks
+        case "All Stacks":
+            return viewModel.allStacks
+        default:
+            return viewModel.allStacks.filter {
+                $0.name.localizedCaseInsensitiveContains(selectedCategory)
+            }
+        }
+    }
+    
+    private var gridTitle: String {
+        switch selectedCategory {
+        case "Recent":
+            return "Recent Stacks"
+        case "All Stacks":
+            return "All Stacks"
+        default:
+            return "\(selectedCategory) Stacks"
+        }
+    }
     
     let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -30,19 +65,38 @@ struct StacksDashboardScreen: View {
                 HStack(spacing: 12) {
                     ForEach(categories, id: \.self) { category in
                         Button {
-                            selectedCategory = category
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                selectedCategory = category
+                            }
                         } label: {
                             Text(category)
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(selectedCategory == category ? .white : .white)
+                                .font(.system(size: 14, weight: selectedCategory == category ? .bold : .semibold))
+                                .foregroundColor(selectedCategory == category ? .white : Color("btn_gradiant_color_0"))
                                 .padding(.horizontal, 20)
                                 .padding(.vertical, 8)
                                 .background(
-                                    selectedCategory == category
-                                    ? Color("btn_gradiant_color_0")
-                                    : Color("btn_gradiant_color_0").opacity(0.8) // Ideally a solid dark teal, matching mock
+                                    Group {
+                                        if selectedCategory == category {
+                                            LinearGradient(
+                                                colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        } else {
+                                            LinearGradient(
+                                                colors: [Color("btn_gradiant_color_0").opacity(0.15), Color("btn_gradiant_color_0").opacity(0.15)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        }
+                                    }
                                 )
                                 .cornerRadius(20)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(selectedCategory == category ? Color.clear : Color("btn_gradiant_color_0").opacity(0.3), lineWidth: 1)
+                                )
+                                .shadow(color: selectedCategory == category ? Color("btn_gradiant_color_0").opacity(0.3) : Color.clear, radius: 4, x: 0, y: 2)
                         }
                         .buttonStyle(.plain)
                     }
@@ -52,7 +106,7 @@ struct StacksDashboardScreen: View {
             .padding(.bottom, 24)
             
             // MARK: - Grid Title
-            Text("All Stacks")
+            Text(gridTitle)
                 .font(.system(size: 22, weight: .bold))
                 .foregroundColor(.primary)
                 .padding(.horizontal, 20)
@@ -60,13 +114,33 @@ struct StacksDashboardScreen: View {
             
             // MARK: - 2x2 Grid
             ScrollView(showsIndicators: false) {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    // Show up to 4 stacks in the dashboard
-                    ForEach(viewModel.allStacks.prefix(4)) { stack in
-                        DashboardStackCard(stack: stack)
+                if filteredStacks.isEmpty {
+                    VStack(spacing: 14) {
+                        Image(systemName: "folder.badge.questionmark")
+                            .font(.system(size: 46))
+                            .foregroundColor(Color("btn_gradiant_color_0").opacity(0.6))
+                            .padding(.top, 30)
+                        
+                        Text("No \"\(selectedCategory)\" Stacks")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.primary)
+                        
+                        Text("Documents categorized into \"\(selectedCategory)\" will automatically appear here once scanned.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 40)
+                } else {
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(filteredStacks) { stack in
+                            DashboardStackCard(stack: stack)
+                        }
+                    }
+                    .padding(.top, 4)
                 }
-                .padding(.top, 4)
                 
                 // Add some space at the bottom for the tab bar and the big button
                 Spacer().frame(height: 120)
@@ -80,6 +154,7 @@ struct StacksDashboardScreen: View {
         .overlay(
             // MARK: - See all stacks button (Floating at bottom)
             VStack {
+                Spacer()
                 
                 Button {
                     showCollectionScreen = true
@@ -100,7 +175,6 @@ struct StacksDashboardScreen: View {
                         .shadow(color: Color("btn_gradiant_color_1").opacity(0.4), radius: 10, x: 0, y: 5)
                 }
                 .padding(.bottom, 90) // Padding above the tab bar
-                .padding(.top, 650) // Padding above the tab bar
             }
         )
         .fullScreenCover(isPresented: $showCollectionScreen) {

@@ -15,6 +15,7 @@ enum MainTab {
 struct MainTabBar: View {
     @State private var selectedTab: MainTab = .home
     @State private var showSettings = false
+    @ObservedObject private var profileManager = ProfileImageManager.shared
     
     var body: some View {
         
@@ -41,55 +42,52 @@ struct MainTabBar: View {
                     Button(action: {
                         showSettings = true
                     }) {
-                        if let photoURL = Auth.auth().currentUser?.photoURL {
-                            AsyncImage(url: photoURL) { phase in
-                                switch phase {
-                                case .empty:
-                                    ProgressView()
-                                        .frame(width: 44, height: 44)
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 44, height: 44)
-                                        .clipShape(Circle())
-                                case .failure:
-                                    Image(systemName: "person.circle.fill")
-                                        .resizable()
-                                        .frame(width: 44, height: 44)
-                                        .foregroundColor(Color(hex: "595C5E"))
-                                @unknown default:
-                                    EmptyView()
+                        Group {
+                            if let customImage = profileManager.profileImage {
+                                Image(uiImage: customImage)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 44, height: 44)
+                                    .clipShape(Circle())
+                            } else if let photoURL = Auth.auth().currentUser?.photoURL {
+                                AsyncImage(url: photoURL) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        ProgressView()
+                                            .frame(width: 44, height: 44)
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 44, height: 44)
+                                            .clipShape(Circle())
+                                    case .failure:
+                                        Image(systemName: "person.circle.fill")
+                                            .resizable()
+                                            .frame(width: 44, height: 44)
+                                            .foregroundColor(Color(hex: "595C5E"))
+                                    @unknown default:
+                                        EmptyView()
+                                    }
                                 }
+                            } else {
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .frame(width: 44, height: 44)
+                                    .foregroundColor(Color(hex: "595C5E"))
                             }
-                            .overlay(
-                                Circle()
-                                    .stroke(
-                                        LinearGradient(
-                                            colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
-                                            startPoint: .topLeading, endPoint: .bottomTrailing
-                                        ),
-                                        lineWidth: 2
-                                    )
-                            )
-                            .padding(.horizontal, 20)
-                        } else {
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .frame(width: 44, height: 44)
-                                .foregroundColor(Color(hex: "595C5E"))
-                                .overlay(
-                                    Circle()
-                                        .stroke(
-                                            LinearGradient(
-                                                colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
-                                                startPoint: .topLeading, endPoint: .bottomTrailing
-                                            ),
-                                            lineWidth: 2
-                                        )
-                                )
-                                .padding(.horizontal, 20)
                         }
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [Color("btn_gradiant_color_0"), Color("btn_gradiant_color_1")],
+                                        startPoint: .topLeading, endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 2
+                                )
+                        )
+                        .padding(.horizontal, 20)
                     }
                 } // Closes HStack
                 

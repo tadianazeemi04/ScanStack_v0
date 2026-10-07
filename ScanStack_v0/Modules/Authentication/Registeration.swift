@@ -18,6 +18,7 @@ struct Registeration: View {
     @State private var emailRotation: Double = 0.0
     
     @AppStorage("isLoggedIn") private var isLoggedIn = false
+    @State private var isGoogleLoading = false
     
     //google signin authentication
     func performGoogleSignIn() {
@@ -28,17 +29,40 @@ struct Registeration: View {
             return
         }
         
+        withAnimation {
+            isGoogleLoading = true
+        }
+        
         GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { signInResult, error in
             if let error = error {
                 print("Google Sign-In Error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    withAnimation {
+                        self.isGoogleLoading = false
+                    }
+                }
                 return
             }
             
-            guard let result = signInResult else { return }
+            guard let result = signInResult else {
+                DispatchQueue.main.async {
+                    withAnimation {
+                        self.isGoogleLoading = false
+                    }
+                }
+                return
+            }
             let user = result.user
             
             // 1. Get Google tokens
-            guard let idToken = user.idToken?.tokenString else { return }
+            guard let idToken = user.idToken?.tokenString else {
+                DispatchQueue.main.async {
+                    withAnimation {
+                        self.isGoogleLoading = false
+                    }
+                }
+                return
+            }
             let credential = GoogleAuthProvider.credential(withIDToken: idToken,
                                                            accessToken: user.accessToken.tokenString)
             
@@ -46,10 +70,22 @@ struct Registeration: View {
             Auth.auth().signIn(with: credential) { authResult, error in
                 if let error = error {
                     print("Firebase Sign-in error: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        withAnimation {
+                            self.isGoogleLoading = false
+                        }
+                    }
                     return
                 }
                 
-                guard let firebaseUser = authResult?.user else { return }
+                guard let firebaseUser = authResult?.user else {
+                    DispatchQueue.main.async {
+                        withAnimation {
+                            self.isGoogleLoading = false
+                        }
+                    }
+                    return
+                }
                 
                 // 3. Save to Firestore Database
                 let db = Firestore.firestore()
@@ -64,6 +100,11 @@ struct Registeration: View {
                 db.collection("users").document(firebaseUser.uid).setData(userData, merge: true) { error in
                     if let error = error {
                         print("Failed to save Google user to database: \(error.localizedDescription)")
+                        DispatchQueue.main.async {
+                            withAnimation {
+                                self.isGoogleLoading = false
+                            }
+                        }
                     } else {
                         // 4. Finally, navigate to Home Screen
                         DispatchQueue.main.async {
@@ -412,7 +453,41 @@ struct Registeration: View {
             }
             .padding(.top, 16)
             
+            // ── Google Sign In Loading Overlay ──
+            if isGoogleLoading {
+                ZStack {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                    
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(1.6)
+                        
+                        Text("Signing in with Google...")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Text("Please wait a moment")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                    .padding(32)
+                    .background(
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                            )
+                    )
+                    .shadow(color: Color.black.opacity(0.25), radius: 20, x: 0, y: 10)
+                }
+                .transition(.opacity)
+                .zIndex(999)
+            }
         }
+        .animation(.easeInOut(duration: 0.25), value: isGoogleLoading)
         .navigationBarBackButtonHidden(true)
         
         

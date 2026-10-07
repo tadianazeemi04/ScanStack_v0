@@ -170,7 +170,7 @@ struct Welcome_1: View {
                             .foregroundColor(Color(hex: "595C5E"))
                             .frame(width: 283, height: 117)
                             .multilineTextAlignment(.center)
-                            .lineHeight(.loose)
+                            .lineSpacing(4)
                     }
                     
                     // next screen navigation buttun

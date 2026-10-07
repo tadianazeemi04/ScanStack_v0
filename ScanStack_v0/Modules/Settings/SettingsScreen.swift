@@ -1,10 +1,13 @@
 import SwiftUI
+import PhotosUI
 
 struct SettingsScreen: View {
     @StateObject private var viewModel = SettingsViewModel()
     @Environment(\.dismiss) private var dismiss
     @State private var showSubscription = false
     @State private var showLogoutAlert = false
+    @State private var showPhotoPicker = false
+    @State private var selectedPhotoItem: PhotosPickerItem? = nil
     
     var body: some View {
         NavigationStack {
@@ -36,49 +39,66 @@ struct SettingsScreen: View {
                         // MARK: - Profile Header
                         VStack(spacing: 8) {
                             ZStack(alignment: .bottomTrailing) {
-                                if let url = viewModel.profilePhotoURL {
-                                    AsyncImage(url: url) { phase in
-                                        switch phase {
-                                        case .empty:
-                                            ProgressView()
-                                                .frame(width: 100, height: 100)
-                                        case .success(let image):
-                                            image
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 100, height: 100)
-                                                .clipShape(RoundedRectangle(cornerRadius: 30))
-                                        case .failure:
-                                            Image(systemName: "person.crop.square.fill")
-                                                .resizable()
-                                                .frame(width: 100, height: 100)
-                                                .foregroundColor(.gray)
-                                                .clipShape(RoundedRectangle(cornerRadius: 30))
-                                        @unknown default:
-                                            EmptyView()
+                                Group {
+                                    if let image = viewModel.profileImage {
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 100, height: 100)
+                                            .clipShape(RoundedRectangle(cornerRadius: 30))
+                                    } else if let url = viewModel.profilePhotoURL {
+                                        AsyncImage(url: url) { phase in
+                                            switch phase {
+                                            case .empty:
+                                                ProgressView()
+                                                    .frame(width: 100, height: 100)
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 100, height: 100)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                                            case .failure:
+                                                Image(systemName: "person.crop.square.fill")
+                                                    .resizable()
+                                                    .frame(width: 100, height: 100)
+                                                    .foregroundColor(.gray)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                                            @unknown default:
+                                                EmptyView()
+                                            }
                                         }
+                                    } else {
+                                        Image(systemName: "person.crop.square.fill")
+                                            .resizable()
+                                            .frame(width: 100, height: 100)
+                                            .foregroundColor(.gray)
+                                            .clipShape(RoundedRectangle(cornerRadius: 30))
                                     }
-                                } else {
-                                    Image(systemName: "person.crop.square.fill")
-                                        .resizable()
-                                        .frame(width: 100, height: 100)
-                                        .foregroundColor(.gray)
-                                        .clipShape(RoundedRectangle(cornerRadius: 30))
+                                }
+                                .onTapGesture {
+                                    showPhotoPicker = true
                                 }
                                 
-                                // Edit Icon Badge
-                                Circle()
-                                    .fill(Color("btn_gradiant_color_0")) // Teal color
-                                    .frame(width: 30, height: 30)
-                                    .overlay(
-                                        Image(systemName: "pencil")
-                                            .foregroundColor(.white)
-                                            .font(.system(size: 14, weight: .bold))
-                                    )
-                                    .overlay(
-                                        Circle().stroke(Color.white, lineWidth: 3)
-                                    )
-                                    .offset(x: 10, y: 10)
+                                // Edit Icon Badge Button
+                                Button {
+                                    showPhotoPicker = true
+                                } label: {
+                                    Circle()
+                                        .fill(Color("btn_gradiant_color_0")) // Teal color
+                                        .frame(width: 34, height: 34)
+                                        .overlay(
+                                            Image(systemName: "pencil")
+                                                .foregroundColor(.white)
+                                                .font(.system(size: 15, weight: .bold))
+                                        )
+                                        .overlay(
+                                            Circle().stroke(Color.white, lineWidth: 3)
+                                        )
+                                        .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+                                }
+                                .buttonStyle(.plain)
+                                .offset(x: 10, y: 10)
                             }
                             
                             VStack(spacing: 4) {
@@ -275,6 +295,17 @@ struct SettingsScreen: View {
                 }
             } message: {
                 Text("Are you sure you want to log out of your account?")
+            }
+            .photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhotoItem, matching: .images)
+            .onChange(of: selectedPhotoItem) { _, newItem in
+                guard let newItem else { return }
+                Task {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        viewModel.updateProfileImage(uiImage)
+                    }
+                    selectedPhotoItem = nil
+                }
             }
         }
     }

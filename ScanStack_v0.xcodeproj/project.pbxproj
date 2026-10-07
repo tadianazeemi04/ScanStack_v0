@@ -7,12 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6A0A9E552FF676300012EA07 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 6A0A9E542FF676300012EA07 /* GoogleSignIn */; };
-		6A0A9E572FF676300012EA07 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6A0A9E562FF676300012EA07 /* GoogleSignInSwift */; };
-		6A4D615C2FFB915100D77DF0 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6A4D615B2FFB915100D77DF0 /* FirebaseAnalytics */; };
-		6A4D61C72FFBB87B00D77DF0 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 6A4D61C62FFBB87B00D77DF0 /* FirebaseAuth */; };
-		6A4D61C92FFBB88700D77DF0 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6A4D61C82FFBB88700D77DF0 /* FirebaseFirestore */; };
-		6A541F9F3009097900C29094 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 6A541F9E3009097900C29094 /* GoogleMobileAds */; };
+		7360A03B304EA35B000BE770 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 7360A03A304EA35B000BE770 /* FirebaseAnalytics */; };
+		7360A03D304EA35B000BE770 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7360A03C304EA35B000BE770 /* FirebaseCore */; };
+		7360A03F304EA35B000BE770 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 7360A03E304EA35B000BE770 /* FirebaseFirestore */; };
+		7360A041304EA35B000BE770 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 7360A040304EA35B000BE770 /* GoogleMobileAds */; };
+		7360A044304EA3AD000BE770 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 7360A043304EA3AD000BE770 /* GoogleSignIn */; };
+		7360A046304EA3AD000BE770 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7360A045304EA3AD000BE770 /* GoogleSignInSwift */; };
+		7360A048304EA3F2000BE770 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7360A047304EA3F2000BE770 /* FirebaseAuth */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,12 +33,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A541F9F3009097900C29094 /* GoogleMobileAds in Frameworks */,
-				6A0A9E552FF676300012EA07 /* GoogleSignIn in Frameworks */,
-				6A0A9E572FF676300012EA07 /* GoogleSignInSwift in Frameworks */,
-				6A4D615C2FFB915100D77DF0 /* FirebaseAnalytics in Frameworks */,
-				6A4D61C92FFBB88700D77DF0 /* FirebaseFirestore in Frameworks */,
-				6A4D61C72FFBB87B00D77DF0 /* FirebaseAuth in Frameworks */,
+				7360A044304EA3AD000BE770 /* GoogleSignIn in Frameworks */,
+				7360A041304EA35B000BE770 /* GoogleMobileAds in Frameworks */,
+				7360A03D304EA35B000BE770 /* FirebaseCore in Frameworks */,
+				7360A046304EA3AD000BE770 /* GoogleSignInSwift in Frameworks */,
+				7360A03B304EA35B000BE770 /* FirebaseAnalytics in Frameworks */,
+				7360A048304EA3F2000BE770 /* FirebaseAuth in Frameworks */,
+				7360A03F304EA35B000BE770 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,12 +90,13 @@
 			);
 			name = ScanStack_v0;
 			packageProductDependencies = (
-				6A0A9E542FF676300012EA07 /* GoogleSignIn */,
-				6A0A9E562FF676300012EA07 /* GoogleSignInSwift */,
-				6A4D615B2FFB915100D77DF0 /* FirebaseAnalytics */,
-				6A4D61C62FFBB87B00D77DF0 /* FirebaseAuth */,
-				6A4D61C82FFBB88700D77DF0 /* FirebaseFirestore */,
-				6A541F9E3009097900C29094 /* GoogleMobileAds */,
+				7360A03A304EA35B000BE770 /* FirebaseAnalytics */,
+				7360A03C304EA35B000BE770 /* FirebaseCore */,
+				7360A03E304EA35B000BE770 /* FirebaseFirestore */,
+				7360A040304EA35B000BE770 /* GoogleMobileAds */,
+				7360A043304EA3AD000BE770 /* GoogleSignIn */,
+				7360A045304EA3AD000BE770 /* GoogleSignInSwift */,
+				7360A047304EA3F2000BE770 /* FirebaseAuth */,
 			);
 			productName = ScanStack_v0;
 			productReference = 6AAA600D2FB58A83005D42D7 /* ScanStack_v0.app */;
@@ -124,9 +127,9 @@
 			mainGroup = 6AAA60042FB58A83005D42D7;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				6A0A9E532FF676300012EA07 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				6A4D615A2FFB915100D77DF0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				6A541F9D3009097900C29094 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+				7360A042304EA3AD000BE770 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6AAA600E2FB58A83005D42D7 /* Products */;
@@ -283,26 +286,31 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = F7BV2K6763;
+				DEVELOPMENT_TEAM = 36FGYP7RA2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ScanStack-v0-Info.plist";
-				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to scan documents.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photos to scan screenshots.";
+				INFOPLIST_KEY_CFBundleDisplayName = ScanStack;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSCameraUsageDescription = "ScanStack needs camera access to allow you to capture and instantly categorize documents or screens.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "ScanStack uses Face ID to protect your private screenshots and sensitive documents.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ScanStack needs access to your photo library to scan, organize, and categorize your screenshots.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.graphicaffect.ScanStack-v0";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.codewithtadian.ScanStack-v0";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -319,26 +327,31 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = F7BV2K6763;
+				DEVELOPMENT_TEAM = 36FGYP7RA2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "ScanStack-v0-Info.plist";
-				INFOPLIST_KEY_NSCameraUsageDescription = "We need access to your camera to scan documents.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need access to your photos to scan screenshots.";
+				INFOPLIST_KEY_CFBundleDisplayName = ScanStack;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSCameraUsageDescription = "ScanStack needs camera access to allow you to capture and instantly categorize documents or screens.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "ScanStack uses Face ID to protect your private screenshots and sensitive documents.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ScanStack needs access to your photo library to scan, organize, and categorize your screenshots.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.graphicaffect.ScanStack-v0";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.codewithtadian.ScanStack-v0";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -374,14 +387,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		6A0A9E532FF676300012EA07 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.2.0;
-			};
-		};
 		6A4D615A2FFB915100D77DF0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -398,38 +403,51 @@
 				minimumVersion = 13.6.0;
 			};
 		};
+		7360A042304EA3AD000BE770 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		6A0A9E542FF676300012EA07 /* GoogleSignIn */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 6A0A9E532FF676300012EA07 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
-			productName = GoogleSignIn;
-		};
-		6A0A9E562FF676300012EA07 /* GoogleSignInSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 6A0A9E532FF676300012EA07 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
-			productName = GoogleSignInSwift;
-		};
-		6A4D615B2FFB915100D77DF0 /* FirebaseAnalytics */ = {
+		7360A03A304EA35B000BE770 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6A4D615A2FFB915100D77DF0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalytics;
 		};
-		6A4D61C62FFBB87B00D77DF0 /* FirebaseAuth */ = {
+		7360A03C304EA35B000BE770 /* FirebaseCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6A4D615A2FFB915100D77DF0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
+			productName = FirebaseCore;
 		};
-		6A4D61C82FFBB88700D77DF0 /* FirebaseFirestore */ = {
+		7360A03E304EA35B000BE770 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6A4D615A2FFB915100D77DF0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
 		};
-		6A541F9E3009097900C29094 /* GoogleMobileAds */ = {
+		7360A040304EA35B000BE770 /* GoogleMobileAds */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6A541F9D3009097900C29094 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
 			productName = GoogleMobileAds;
+		};
+		7360A043304EA3AD000BE770 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7360A042304EA3AD000BE770 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		7360A045304EA3AD000BE770 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7360A042304EA3AD000BE770 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		7360A047304EA3F2000BE770 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6A4D615A2FFB915100D77DF0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

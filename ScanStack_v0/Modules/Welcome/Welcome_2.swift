@@ -207,8 +207,7 @@ struct Welcome_2: View {
                                 .foregroundColor(Color("btn_gradiant_color_1"))
                             
                                 .padding()
-                            //.glassEffect(in: RoundedRectangle(cornerRadius: 16))
-                                .glassEffect()
+                                .background(.ultraThinMaterial, in: Capsule())
                                 .overlay{
                                     Capsule()
                                         .stroke(LinearGradient(colors: [Color(.white)], startPoint: .top, endPoint: .bottom),
@@ -240,7 +239,7 @@ struct Welcome_2: View {
                             .foregroundColor(Color(hex: "595C5E"))
                             .frame(width: 360, height: 108)
                             .multilineTextAlignment(.center)
-                            .lineHeight(.loose)
+                            .lineSpacing(4)
                     }
                     .padding(.top)
                     

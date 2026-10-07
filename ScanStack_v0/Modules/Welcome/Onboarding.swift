@@ -537,7 +537,7 @@ struct Slide2ContentView: View {
                         .font(.system(size: 14, weight: .heavy))
                         .foregroundColor(Color("btn_gradiant_color_1"))
                         .padding()
-                        .glassEffect()
+                        .background(.ultraThinMaterial, in: Capsule())
                         .overlay {
                             Capsule()
                                 .stroke(

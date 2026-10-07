@@ -19,6 +19,14 @@
 	<string>ca-app-pub-2172440545415389~9219154089</string>
 	<key>GIDClientID</key>
 	<string>529338335154-ub8h752juku71q80bt03sb494oigu5q6.apps.googleusercontent.com</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ScanStack needs access to your photo library to scan, organize, and categorize your screenshots.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>ScanStack needs camera access to allow you to capture and instantly categorize documents or screens.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>ScanStack uses Face ID to protect your private screenshots and sensitive documents.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

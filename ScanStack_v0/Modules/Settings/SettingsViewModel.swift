@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import CoreData
 import FirebaseAuth
 import Combine
@@ -22,6 +23,7 @@ class SettingsViewModel: ObservableObject {
     @Published var displayName: String = "User Name"
     @Published var email: String = "user@example.com"
     @Published var profilePhotoURL: URL? = nil
+    @Published var profileImage: UIImage? = nil
     
     @Published var totalStorageUsedBytes: Int64 = 0
     @Published var totalStorageCapacityBytes: Int64 = 128 * 1024 * 1024 * 1024 // Fake 128GB total for mockup purposes
@@ -40,6 +42,12 @@ class SettingsViewModel: ObservableObject {
             self.email = user.email ?? "useremail@gmail.com"
             self.profilePhotoURL = user.photoURL
         }
+        self.profileImage = ProfileImageManager.shared.profileImage
+    }
+    
+    func updateProfileImage(_ image: UIImage) {
+        self.profileImage = image
+        ProfileImageManager.shared.saveProfileImage(image)
     }
     
     func calculateStorage() {
@@ -97,6 +105,8 @@ class SettingsViewModel: ObservableObject {
     func signOut() {
         do {
             try Auth.auth().signOut()
+            ProfileImageManager.shared.clearProfileImage()
+            self.profileImage = nil
             // The AppStorage observer in StartupView/MainTabBar will catch this and kick them to login
             UserDefaults.standard.set(false, forKey: "isLoggedIn")
         } catch {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HelpAndSupportScreen: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var showMailFallbackAlert = false
     
     var body: some View {
         ZStack {
@@ -58,7 +59,7 @@ struct HelpAndSupportScreen: View {
                                 .padding(.horizontal, 20)
                             
                             Button {
-                                // Dummy action
+                                contactSupport()
                             } label: {
                                 Text("Contact Us")
                                     .font(.system(size: 16, weight: .bold))
@@ -101,6 +102,24 @@ struct HelpAndSupportScreen: View {
             }
         }
         .navigationBarHidden(true)
+        .alert("Contact Support", isPresented: $showMailFallbackAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("No mail client was found. Our support email (tadianiosdev@gmail.com) has been copied to your clipboard.")
+        }
+    }
+    
+    private func contactSupport() {
+        let email = "tadianiosdev@gmail.com"
+        let subject = "ScanStack Support Request".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        if let mailtoURL = URL(string: "mailto:\(email)?subject=\(subject)") {
+            if UIApplication.shared.canOpenURL(mailtoURL) {
+                UIApplication.shared.open(mailtoURL)
+            } else {
+                UIPasteboard.general.string = email
+                showMailFallbackAlert = true
+            }
+        }
     }
 }
 

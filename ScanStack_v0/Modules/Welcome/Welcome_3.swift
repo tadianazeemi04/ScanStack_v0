@@ -56,7 +56,7 @@ struct Welcome_3: View {
                         .foregroundColor(Color(hex: "595C5E"))
                         .frame(width: 303, height: 117)
                         .multilineTextAlignment(.center)
-                        .lineHeight(.loose)
+                        .lineSpacing(4)
                 }
                 
                 // navigation bar
